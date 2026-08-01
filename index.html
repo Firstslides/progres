@@ -1,0 +1,3867 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Progres</title>
+    
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#09090e">
+    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="manifest" href="manifest.json">
+
+    <style>
+        /* --- DESIGN SOMBRE & NÉON --- */
+        :root {
+            --bg-color: #09090e;
+            --card-bg: #12121a;
+            --text-color: #ffffff;
+            --text-muted: #8a8a93;
+            --gradient-primary: linear-gradient(135deg, #ff007f, #7f00ff);
+            --gradient-secondary: linear-gradient(135deg, #00f0ff, #7f00ff);
+            --gradient-gold: linear-gradient(135deg, #ffd700, #ff8800);
+            --border-color: rgba(255, 255, 255, 0.08);
+            --danger-color: #ff3333;
+            --success-color: #00ff66;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding-bottom: 40px;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 25px 20px;
+            background: linear-gradient(to bottom, #000000, var(--bg-color));
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 1.4rem;
+            letter-spacing: 1px;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-container {
+            display: flex;
+            justify-content: space-around;
+            gap: 15px;
+        }
+
+        .stat-circle-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 20px;
+            flex: 1;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        .circle-wrapper {
+            position: relative;
+            width: 90px;
+            height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .circle-wrapper svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .circle-progress-bar {
+            transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .circle-value {
+            font-size: 1.3rem;
+            font-weight: 800;
+            position: absolute;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-circle-box h3 {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-align: center;
+        }
+
+        main {
+            padding: 25px 20px;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        h2 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            margin-bottom: 15px;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-top: 25px;
+            margin-bottom: 12px;
+            color: #ffffff;
+        }
+
+        .habit-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+        }
+
+        .habit-main-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .habit-label {
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .habit-label.completed {
+            text-decoration: line-through;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+
+        .neon-checkbox {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 28px;
+            height: 28px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .neon-checkbox:checked {
+            background: #ff007f;
+            border-color: transparent;
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.4);
+        }
+
+        .neon-checkbox:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .action-banner-pink {
+            background: var(--gradient-primary);
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 0, 127, 0.25);
+            transition: transform 0.2s;
+        }
+
+        .action-banner-pink:active {
+            transform: scale(0.98);
+        }
+
+        .action-banner-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .action-banner-plus {
+            font-size: 1.3rem;
+            font-weight: 900;
+        }
+
+        .habit-monthly-spec {
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            padding-top: 12px;
+        }
+
+        .monthly-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .monthly-bar-bg {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .monthly-bar-fill {
+            height: 100%;
+            width: 0%; 
+            background: var(--gradient-secondary);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+
+        .pr-banner {
+            background: linear-gradient(to right, rgba(255, 215, 0, 0.15), var(--card-bg));
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 16px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.1);
+        }
+
+        .pr-icon {
+            font-size: 1.8rem;
+            background: var(--gradient-gold);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .week-planner {
+            display: flex;
+            justify-content: space-between;
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .day-badge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 700;
+        }
+
+        .day-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .day-badge.workout .day-circle {
+            border-color: #ff007f;
+            color: #ff007f;
+            box-shadow: 0 0 8px rgba(255, 0, 127, 0.2);
+        }
+
+        .day-badge.today .day-circle {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.5);
+        }
+
+        .timer-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 18px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: inset 0 0 12px rgba(0,0,0,0.2);
+        }
+
+        .btn-timer-preset {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-timer-preset:hover {
+            border-color: #00f0ff;
+            background: rgba(0, 240, 255, 0.05);
+        }
+
+        .exercise-card {
+            background: var(--card-bg);
+            border-radius: 18px;
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .exercise-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .exercise-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+        }
+
+        .exercise-prs {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0,0,0,0.2);
+            padding: 12px;
+            border-radius: 12px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .pr-badge {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .pr-badge .icon { font-size: 1.8rem; display: block; line-height: 1; }
+        .pr-badge .weight { font-weight: 900; font-size: 1.15rem; line-height: 1.2; display: block; }
+        .pr-badge .type { font-size: 0.6rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; margin-top: 2px; }
+
+        .arrow-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: transform 0.3s ease, color 0.3s;
+            padding: 5px;
+        }
+
+        .arrow-btn.open {
+            transform: rotate(180deg);
+            color: #00f0ff;
+        }
+
+        .sets-management {
+            margin-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            padding-top: 15px;
+            display: none;
+        }
+
+        .sets-management.open {
+            display: block;
+        }
+
+        .set-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .set-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            width: 55px;
+            font-weight: 600;
+        }
+
+        .set-input-group {
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 6px 10px;
+            flex: 1;
+        }
+
+        .set-input-group input {
+            background: transparent;
+            border: none;
+            color: white;
+            width: 100%;
+            text-align: center;
+            font-size: 0.95rem;
+            font-weight: 700;
+            outline: none;
+        }
+
+        .set-input-group span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-left: 4px;
+        }
+
+        .btn-add-set {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .btn-add-set:hover {
+            background: #ff007f;
+            border-color: transparent;
+        }
+
+        .graph-container {
+            display: none;
+            margin-top: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 15px;
+            border: 1px solid rgba(255,255,255,0.03);
+        }
+
+        .graph-container.open {
+            display: block;
+        }
+
+        .graph-bars {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 80px;
+            margin-bottom: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            padding-bottom: 2px;
+        }
+
+        .graph-bar-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .graph-bar-fill {
+            width: 16px;
+            background: var(--gradient-secondary);
+            border-radius: 4px 4px 0 0;
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.3);
+            transition: height 0.5s ease;
+        }
+
+        .graph-labels {
+            display: flex;
+            justify-content: space-around;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+            text-align: center;
+        }
+
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .input-dark {
+            flex: 1;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 14px;
+            border-radius: 12px;
+            color: white;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .input-dark:focus {
+            border-color: #ff007f;
+        }
+        
+        select.input-dark {
+            appearance: none;
+            cursor: pointer;
+        }
+
+        .btn-action {
+            padding: 14px 20px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .settings-list-item {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .settings-list-item input {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            width: 70%;
+            outline: none;
+        }
+
+        .btn-delete {
+            background: none;
+            border: none;
+            color: var(--danger-color);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .menu-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-color);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .menu-btn span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background-color: var(--text-color);
+        }
+
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background-color: #06060a;
+            z-index: 100;
+            transition: left 0.3s cubic-bezier(0.1, 0.9, 0.2, 1);
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .menu-overlay.open {
+            left: 0;
+        }
+
+        .close-menu-btn {
+            align-self: flex-end;
+            background: none;
+            border: none;
+            font-size: 2rem;
+            color: var(--text-color);
+            cursor: pointer;
+            margin-bottom: 40px;
+        }
+
+        .menu-links {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .menu-link {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-color);
+            text-decoration: none;
+            text-transform: uppercase;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            letter-spacing: 0.5px;
+        }
+
+        .time-filter-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 4px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-filter-time {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-filter-time.active {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 0, 127, 0.2);
+        }
+        
+        /* Specific Nutrition Styles */
+        .food-entry {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+        
+        .food-info span { display: block; }
+        .food-name { font-weight: 700; font-size: 1rem; }
+        .food-details { font-size: 0.75rem; color: var(--text-muted); }
+        
+        .kcal-progress {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .kcal-progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            transition: width 0.3s ease;
+        }
+        .kcal-progress-fill.over {
+            background: var(--danger-color);
+        }
+        
+        .food-dropdown-item:hover {
+            background: rgba(255,255,255,0.05);
+        }
+    </style>
+
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script>
+    // ===== PWA MANIFEST =====
+
+
+    // ===== SERVICE WORKER =====
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').catch(() => {});
+        });
+    }
+
+    // ===== GOOGLE DRIVE BACKUP =====
+    const GOOGLE_CLIENT_ID = '820673690859-3fbceqqufc0t2oei99vl95bvv1hrg49j.apps.googleusercontent.com';
+    const SCOPES = 'https://www.googleapis.com/auth/drive.file';
+    const BACKUP_FILENAME = 'progres_backup.json';
+    let driveAccessToken = null;
+
+    // Vérification robuste : les données sont considérées vides seulement si aucune structure
+    // connue ne contient réellement quelque chose. Utilisée à la fois par la sauvegarde manuelle
+    // et automatique pour ne JAMAIS écraser une sauvegarde Drive existante avec du vide.
+    function isProgresDataEmpty(parsed) {
+        if (!parsed || typeof parsed !== 'object') return true;
+        return !(
+            (parsed.habits && parsed.habits.length > 0)
+            || (parsed.exercises && parsed.exercises.length > 0)
+            || Object.keys(parsed.history || {}).length > 0
+            || Object.keys(parsed.workoutHistory || {}).length > 0
+        );
+    }
+
+    function setDriveStatus(msg, color) {
+        const el = document.getElementById('drive-status');
+        if (el) { el.textContent = msg; el.style.color = color || 'var(--text-muted)'; }
+    }
+
+    function getGoogleToken(callback) {
+        driveAccessToken = null; // toujours redemander un token frais
+        const client = google.accounts.oauth2.initTokenClient({
+            client_id: GOOGLE_CLIENT_ID,
+            scope: SCOPES,
+            callback: (response) => {
+                if (response.error) { setDriveStatus('Connexion Google échouée : ' + response.error, '#ff3333'); return; }
+                driveAccessToken = response.access_token;
+                callback(driveAccessToken);
+            }
+        });
+        client.requestAccessToken();
+    }
+
+    function driveBackup() {
+        const data = localStorage.getItem('tracker_progres_data');
+        if (!data || data === '{}' || data === 'null') {
+            setDriveStatus('❌ Aucune donnée à sauvegarder.', '#ff3333');
+            return;
+        }
+        let parsedCheck;
+        try { parsedCheck = JSON.parse(data); } catch(e) { setDriveStatus('❌ Données corrompues.', '#ff3333'); return; }
+        setDriveStatus('Connexion à Google...', '#00f0ff');
+        getGoogleToken(async (token) => {
+            try {
+                setDriveStatus('Sauvegarde en cours...', '#00f0ff');
+
+                // Chercher si le fichier existe déjà
+                const searchRes = await fetch(
+                    `https://www.googleapis.com/drive/v3/files?q=name%3D%27${BACKUP_FILENAME}%27+and+trashed%3Dfalse&fields=files(id,name)`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const searchData = await searchRes.json();
+                const existingFile = searchData.files && searchData.files[0];
+
+                // GARDE-FOU : si une sauvegarde existe déjà sur Drive, on refuse de l'écraser
+                // avec des données locales qui semblent vides (ex: stockage local vidé par le
+                // navigateur). Empêche un vidage accidentel de détruire silencieusement le backup.
+                if (existingFile && isProgresDataEmpty(parsedCheck)) {
+                    setDriveStatus('⚠️ Sauvegarde annulée : données locales vides alors qu\'une sauvegarde existe déjà. Utilise "Restaurer" ou l\'historique.', '#ffaa00');
+                    return;
+                }
+
+                const blob = new Blob([data], { type: 'application/json' });
+                const formData = new FormData();
+                formData.append('metadata', new Blob([JSON.stringify({ name: BACKUP_FILENAME })], { type: 'application/json' }));
+                formData.append('file', blob);
+
+                // keepRevisionForever=true : Drive ne purge jamais les anciennes versions,
+                // ce qui garantit un filet de secours via l'historique même en cas de bug futur.
+                const url = existingFile
+                    ? `https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=multipart&keepRevisionForever=true`
+                    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&keepRevisionForever=true`;
+                const method = existingFile ? 'PATCH' : 'POST';
+
+                const uploadRes = await fetch(url, {
+                    method, headers: { Authorization: `Bearer ${token}` }, body: formData
+                });
+
+                if (uploadRes.ok) {
+                    const now = new Date().toLocaleString('fr-FR');
+                    setDriveStatus(`✅ Sauvegarde réussie — ${now}`, '#00ff66');
+                    localStorage.setItem('lastBackupDate', now);
+                } else {
+                    const err = await uploadRes.json();
+                    setDriveStatus('❌ Erreur : ' + (err.error?.message || uploadRes.status), '#ff3333');
+                }
+            } catch(e) {
+                setDriveStatus('❌ Erreur : ' + e.message, '#ff3333');
+            }
+        });
+    }
+
+    function driveRestore() {
+        if (!confirm('Restaurer les données depuis Google Drive ? Tes données actuelles seront remplacées.')) return;
+        setDriveStatus('Connexion à Google...', '#00f0ff');
+        getGoogleToken(async (token) => {
+            try {
+                setDriveStatus('Recherche de la sauvegarde...', '#00f0ff');
+                const searchRes = await fetch(
+                    `https://www.googleapis.com/drive/v3/files?q=name%3D%27${BACKUP_FILENAME}%27+and+trashed%3Dfalse&fields=files(id,name)`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const searchData = await searchRes.json();
+                if (!searchData.files || searchData.files.length === 0) {
+                    setDriveStatus('❌ Aucune sauvegarde trouvée sur Drive.', '#ff3333'); return;
+                }
+                const fileId = searchData.files[0].id;
+                const fileRes = await fetch(
+                    `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const restoredData = await fileRes.text();
+                JSON.parse(restoredData); // valider le JSON
+                localStorage.setItem('tracker_progres_data', restoredData);
+                setDriveStatus('✅ Restauration réussie ! Rechargement...', '#00ff66');
+                setTimeout(() => location.reload(), 1500);
+            } catch(e) {
+                setDriveStatus('❌ Erreur : ' + e.message, '#ff3333');
+            }
+        });
+    }
+
+    // Liste toutes les anciennes versions du fichier de sauvegarde sur Drive et permet
+    // de restaurer n'importe laquelle (utile si la dernière version est vide/corrompue).
+    function showDriveHistory() {
+        const listEl = document.getElementById('drive-history-list');
+        listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--text-muted);'>Chargement de l'historique...</p>";
+        getGoogleToken(async (token) => {
+            try {
+                const searchRes = await fetch(
+                    `https://www.googleapis.com/drive/v3/files?q=name%3D%27${BACKUP_FILENAME}%27+and+trashed%3Dfalse&fields=files(id,name)`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const searchData = await searchRes.json();
+                const existingFile = searchData.files && searchData.files[0];
+                if (!existingFile) {
+                    listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--text-muted);'>Aucune sauvegarde trouvée sur Drive.</p>";
+                    return;
+                }
+                const revRes = await fetch(
+                    `https://www.googleapis.com/drive/v3/files/${existingFile.id}/revisions?fields=revisions(id,modifiedTime,size)`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const revJson = await revRes.json();
+                const revisions = (revJson.revisions || []).sort((a, b) => new Date(b.modifiedTime) - new Date(a.modifiedTime));
+                if (revisions.length === 0) {
+                    listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--text-muted);'>Aucune version trouvée.</p>";
+                    return;
+                }
+                listEl.innerHTML = revisions.map(r => {
+                    const date = new Date(r.modifiedTime).toLocaleString('fr-FR');
+                    const sizeKo = r.size ? (parseInt(r.size, 10) / 1024).toFixed(1) + ' Ko' : 'taille inconnue';
+                    return `
+                        <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.08); font-size:0.8rem;">
+                            <span>${date}<br><span style="color:var(--text-muted);">${sizeKo}</span></span>
+                            <button class="btn-action" style="width:auto; padding:6px 12px; margin:0; font-size:0.8rem;" onclick="restoreDriveRevision('${existingFile.id}','${r.id}')">Restaurer</button>
+                        </div>`;
+                }).join('');
+            } catch(e) {
+                listEl.innerHTML = "<p style='font-size:0.8rem;color:var(--text-muted);'>Erreur lors du chargement de l'historique.</p>";
+            }
+        });
+    }
+
+    function restoreDriveRevision(fileId, revisionId) {
+        if (!confirm('Restaurer cette version précise depuis Drive ? Tes données actuelles seront remplacées.')) return;
+        getGoogleToken(async (token) => {
+            try {
+                const res = await fetch(
+                    `https://www.googleapis.com/drive/v3/files/${fileId}/revisions/${revisionId}?alt=media`,
+                    { headers: { Authorization: `Bearer ${token}` } }
+                );
+                const restoredData = await res.text();
+                JSON.parse(restoredData);
+                localStorage.setItem('tracker_progres_data', restoredData);
+                setDriveStatus('✅ Version restaurée ! Rechargement...', '#00ff66');
+                setTimeout(() => location.reload(), 1500);
+            } catch(e) {
+                setDriveStatus('❌ Erreur lors de la restauration de cette version.', '#ff3333');
+            }
+        });
+    }
+    </script>
+</head>
+<body>
+
+    <audio id="silent-audio" loop src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"></audio>
+
+    <header>
+        <div class="header-top">
+            <div class="logo">PROGRES.</div>
+            <button class="menu-btn" onclick="toggleMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        
+        <div class="stats-container" id="header-stats-container">
+            <div class="stat-circle-box">
+                <div class="circle-wrapper">
+                    <svg viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="dayGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#7f00ff" />
+                                <stop offset="100%" stop-color="#ff007f" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="transparent" />
+                        <circle id="circle-day" class="circle-progress-bar" cx="50" cy="50" r="40" 
+                                stroke="url(#dayGrad)" stroke-width="8" fill="transparent"
+                                stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                    </svg>
+                    <div class="circle-value" id="global-day-score">0%</div>
+                </div>
+                <h3>Total Jour</h3>
+            </div>
+
+            <div class="stat-circle-box">
+                <div class="circle-wrapper">
+                    <svg viewBox="0 0 100 100">
+                        <defs>
+                            <linearGradient id="monthGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                                <stop offset="0%" stop-color="#7f00ff" />
+                                <stop offset="100%" stop-color="#00f0ff" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="50" cy="50" r="40" stroke="rgba(255,255,255,0.04)" stroke-width="8" fill="transparent" />
+                        <circle id="circle-month" class="circle-progress-bar" cx="50" cy="50" r="40" 
+                                stroke="url(#monthGrad)" stroke-width="8" fill="transparent"
+                                stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="251.2" />
+                    </svg>
+                    <div class="circle-value" id="global-month-score">0%</div>
+                </div>
+                <h3>Total Mois</h3>
+            </div>
+        </div>
+
+        <div id="header-succes-container" style="display: none; justify-content: center; align-items: center; width: 100%;">
+            <div class="stat-circle-box" style="flex: 1; max-width: 250px; padding: 20px; text-align: center;">
+                <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px;">Nombre de Trophées</h3>
+                <div style="font-size: 3.5rem; margin-bottom: 5px; text-shadow: 0 0 15px rgba(255, 215, 0, 0.4);">🏆</div>
+                <div id="trophies-count" style="font-size: 2.2rem; font-weight: 900; background: var(--gradient-gold); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0</div>
+            </div>
+        </div>
+
+        <div id="header-timers-container" style="display: none; flex-direction: column; gap: 12px;">
+            <div class="timer-container" style="border-color: rgba(255, 0, 127, 0.25); background: linear-gradient(to right, rgba(255, 0, 127, 0.03), var(--card-bg)); margin-bottom: 0;">
+                <div>
+                    <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Temps Total Séance</div>
+                    <div id="session-timer-display" style="font-size: 1.7rem; font-weight: 900; font-variant-numeric: tabular-nums; color: #ff007f; margin-top: 2px;">00:00:00</div>
+                </div>
+                <button id="btn-session-timer-toggle" class="btn-action" style="padding: 12px 16px; font-size: 0.85rem; background: var(--gradient-primary);" onclick="toggleSessionTimer()">Lancer la séance</button>
+            </div>
+
+            <div class="timer-container" style="flex-direction: column; align-items: stretch; gap: 0; margin-bottom: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px;">Récupération</div>
+                        <div id="timer-display" style="font-size: 1.7rem; font-weight: 900; font-variant-numeric: tabular-nums; color: #00f0ff; margin-top: 2px;">01:30</div>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <button id="btn-replay-toggle" class="btn-action" style="padding: 10px; width: 44px; height: 44px; background: var(--gradient-primary); border: none; color: white; display: flex; align-items: center; justify-content: center; transition: all 0.3s;" onclick="toggleAutoReplay()" title="Relance automatique">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="23 4 23 10 17 10"></polyline>
+                                <polyline points="1 20 1 14 7 14"></polyline>
+                                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                            </svg>
+                        </button>
+                        <button id="btn-timer-toggle" class="btn-action" style="padding: 10px 20px; font-size: 0.85rem; width: 100%;" onclick="toggleTimer()">Lancer la récup</button>
+                    </div>
+                </div>
+                <div id="timer-presets-container" style="display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 12px;"></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="menu-overlay" id="menuOverlay">
+        <button class="close-menu-btn" onclick="toggleMenu()">✕</button>
+        <nav class="menu-links">
+            <button class="menu-link" onclick="navigateTo('accueil')">Suivi Quotidien</button>
+            <button class="menu-link" onclick="navigateTo('sport')">Sport</button>
+            <button class="menu-link" onclick="navigateTo('performance')">Performance</button>
+            <button class="menu-link" onclick="navigateTo('nutrition')">Nutrition</button>
+            <button class="menu-link" onclick="navigateTo('succes')">Succès</button>
+            <button class="menu-link" onclick="navigateTo('parametres')">Paramètres</button>
+        </nav>
+    </div>
+
+    <main>
+        <section id="page-accueil" class="page active">
+            <div id="home-pr-display"></div>
+
+            <h2>Objectifs quotidiens</h2>
+            <div id="habits-list" style="margin-bottom: 10px;"></div>
+
+            <h3 style="margin-top:20px; margin-bottom:10px; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px; color:var(--text-muted); font-weight:700;">Cette semaine</h3>
+            <div id="weekly-habits-list" style="margin-bottom: 25px;"></div>
+
+            <h2>Objectifs personnels</h2>
+            <div class="action-banner-pink" onclick="toggleAddCustomGoalForm()">
+                <div class="action-banner-title">Gérer les objectifs</div>
+                <div class="action-banner-plus">+</div>
+            </div>
+            
+            <div id="custom-goal-form" style="display: none; margin-bottom: 15px;" class="form-group">
+                <input type="text" id="custom-goal-input" class="input-dark" placeholder="Ex: Finir le montage de la vidéo...">
+                <button class="btn-action" onclick="saveCustomGoal()">Ajouter</button>
+            </div>
+
+            <div id="custom-goals-list"></div>
+
+            <div id="jour-off-card" class="habit-card" style="margin-top:30px; border-color:rgba(255,200,0,0.2); background:linear-gradient(to right, rgba(255,200,0,0.03), var(--card-bg));">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <span style="font-weight:800; font-size:1rem; color:#ffd700;">⚡ Mode repos</span>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-weight:700; font-size:0.95rem;">Jour off</span>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Se décoche automatiquement demain</div>
+                        </div>
+                        <input type="checkbox" class="neon-checkbox" id="jour-off-checkbox" onchange="toggleJourOff(this.checked)">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <span style="font-weight:700; font-size:0.95rem;">🏖️ Vacances</span>
+                            <div style="font-size:0.75rem; color:var(--text-muted); margin-top:2px;">Reste coché jusqu'à désactivation manuelle</div>
+                        </div>
+                        <input type="checkbox" class="neon-checkbox" id="vacances-checkbox" onchange="toggleVacances(this.checked)">
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-sport" class="page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2>Entraînement</h2>
+                <input type="date" id="sport-date-picker" class="input-dark" style="padding: 8px 12px; font-size: 0.9rem; max-width: 160px; margin: 0;" onchange="changeSportDate(this.value)">
+            </div>
+            
+            <div class="week-planner" id="week-planner-container"></div>
+
+            <div style="margin-bottom: 15px;">
+                <select id="routine-filter" class="input-dark" style="width: 100%; border-color: rgba(0,240,255,0.3); color: #00f0ff; font-weight: 700;" onchange="changeRoutineFilter(this.value)">
+                </select>
+            </div>
+
+            <div id="exercises-list"></div>
+        </section>
+
+        <section id="page-performance" class="page">
+            <h2>Performance</h2>
+            
+            <div style="display: flex; gap: 15px; margin-bottom: 25px;">
+                <div style="flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">Temps<br>(Année)</div>
+                    <div id="yearly-hours-val" style="font-size: 2.2rem; font-weight: 900; background: var(--gradient-primary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0h</div>
+                </div>
+                <div style="flex: 1; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 18px; padding: 20px; text-align: center; box-shadow: 0 8px 24px rgba(0,0,0,0.2);">
+                    <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-weight: 700;">Charge<br>(Année)</div>
+                    <div id="yearly-tonnage-val" style="font-size: 2.2rem; font-weight: 900; background: var(--gradient-secondary); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">0t</div>
+                </div>
+            </div>
+
+            <div id="performance-time-content"></div>
+            <div id="performance-pr-content" style="margin-top: 25px;"></div>
+        </section>
+
+        <section id="page-nutrition" class="page">
+            <h2>Nutrition</h2>
+            
+            <div class="habit-card">
+                <h3 style="margin-top: 0; margin-bottom: 20px;">Total journalier</h3>
+                
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <div id="kcal-summary" style="flex:1; text-align:center;"></div>
+                    <div id="prot-summary" style="flex:1; text-align:center;"></div>
+                    <div id="carb-summary" style="flex:1; text-align:center;"></div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <div style="position: relative; width: 100%; margin-bottom: 8px;">
+                        <input type="text" id="food-search-input" class="input-dark" style="width: 100%; padding: 14px 10px; font-size: 0.9rem;" placeholder="Rechercher/sélectionner Aliment" onfocus="renderFoodDropdownList()" oninput="renderFoodDropdownList()" autocomplete="off">
+                        <input type="hidden" id="food-select-hidden">
+                        <div id="food-dropdown-list" style="display:none; position:absolute; top:100%; left:0; width:100%; max-height:200px; overflow-y:auto; background:var(--card-bg); border:1px solid var(--border-color); border-radius:12px; z-index:50; margin-top:5px; box-shadow:0 8px 20px rgba(0,0,0,0.5);"></div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <input type="number" id="food-amount" class="input-dark" style="flex: 1; padding: 14px 10px; text-align: center; font-size: 0.9rem;" placeholder="poids en gramme">
+                        <button class="btn-action" style="padding: 14px 15px; font-size: 0.9rem;" onclick="addFoodEntry()">Ajouter</button>
+                    </div>
+                </div>
+                
+                <div id="today-food-entries"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; margin-top: 25px;" onclick="toggleSettingsSection('gestion-food-content', 'arrow-gestion-food')">
+                <h3 style="margin: 0;">Ajouter/supprimer aliments</h3>
+                <button class="arrow-btn" id="arrow-gestion-food" style="pointer-events: none;">▼</button>
+            </div>
+            
+            <div id="gestion-food-content" style="display: none; margin-bottom: 25px;">
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="new-food-name" class="input-dark" style="width: 100%; margin-bottom: 10px;" placeholder="Nom de l'aliment">
+                    <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                        <input type="number" id="new-food-kcal" class="input-dark" style="flex:1; min-width:0; padding: 12px 8px; font-size: 0.9rem;" placeholder="Kcal / 100g">
+                        <input type="number" id="new-food-protein" class="input-dark" style="flex:1; min-width:0; padding: 12px 8px; font-size: 0.9rem;" placeholder="Prot / 100g">
+                        <input type="number" id="new-food-carb" class="input-dark" style="flex:1; min-width:0; padding: 12px 8px; font-size: 0.9rem;" placeholder="Carb / 100g">
+                    </div>
+                    <button class="btn-action" style="width: 100%;" onclick="addFoodItem()">Créer</button>
+                </div>
+                <div id="food-settings-list"></div>
+            </div>
+
+            <div class="habit-card">
+                <h3>Évolution des Calories</h3>
+                <div class="time-filter-bar">
+                    <button class="btn-filter-time active" id="btn-kcal-jours" onclick="setNutriFilter('kcal', 'jours')">Jours</button>
+                    <button class="btn-filter-time" id="btn-kcal-semaines" onclick="setNutriFilter('kcal', 'semaines')">Semaines</button>
+                    <button class="btn-filter-time" id="btn-kcal-mois" onclick="setNutriFilter('kcal', 'mois')">Mois</button>
+                    <button class="btn-filter-time" id="btn-kcal-annees" onclick="setNutriFilter('kcal', 'annees')">Années</button>
+                </div>
+                <div id="kcal-chart-container" style="margin-top:20px;"></div>
+            </div>
+
+            <div class="habit-card" style="margin-top:25px;">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>Poids du jour (kg)</h3>
+                    <div style="display:flex; gap:10px;">
+                        <input type="number" step="0.1" id="today-weight-input" class="input-dark" style="width:100px; text-align:right;" placeholder="Ex: 75.5">
+                        <button class="btn-action" onclick="saveTodayWeight()">Sauver</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="habit-card">
+                <h3>Évolution du Poids</h3>
+                <div class="time-filter-bar">
+                    <button class="btn-filter-time active" id="btn-weight-jours" onclick="setNutriFilter('weight', 'jours')">Jours</button>
+                    <button class="btn-filter-time" id="btn-weight-semaines" onclick="setNutriFilter('weight', 'semaines')">Semaines</button>
+                    <button class="btn-filter-time" id="btn-weight-mois" onclick="setNutriFilter('weight', 'mois')">Mois</button>
+                    <button class="btn-filter-time" id="btn-weight-annees" onclick="setNutriFilter('weight', 'annees')">Années</button>
+                </div>
+                <div id="weight-chart-container" style="margin-top:20px;"></div>
+            </div>
+        </section>
+
+        <section id="page-succes" class="page">
+            <h2>Mes Trophées & Records</h2>
+            <div class="action-banner-pink" style="margin-top: 15px;" onclick="toggleAddAchievementForm()">
+                <div class="action-banner-title">Ajouter un succès à débloquer</div>
+                <div class="action-banner-plus">+</div>
+            </div>
+
+            <div id="achievement-custom-form" style="display: none; margin-bottom: 20px;" class="form-group">
+                <input type="text" id="achievement-custom-input" class="input-dark" placeholder="Ex: Atteindre 50km à Vélo, Courir 10km...">
+                <button class="btn-action" onclick="saveCustomAchievement()">Créer</button>
+            </div>
+
+            <div id="achievements-container"></div>
+        </section>
+
+        <section id="page-parametres" class="page">
+            <h2>Paramètres</h2>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; margin-top: 25px;" onclick="toggleSettingsSection('gestion-objectifs-nutrition-content', 'arrow-gestion-objectifs-nutrition')">
+                <h3 style="margin: 0; white-space: nowrap;">Objectifs nutritionnels journaliers</h3>
+                <button class="arrow-btn" id="arrow-gestion-objectifs-nutrition" style="pointer-events: none;">▼</button>
+            </div>
+            
+            <div id="gestion-objectifs-nutrition-content" style="display: none; margin-bottom: 25px;">
+                <div class="habit-card" style="margin-bottom: 0;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <span style="font-weight: 600;">Calories</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" id="settings-daily-kcal" class="input-dark" style="width: 80px; text-align: right; padding: 8px;" onchange="updateDailyKcal(this.value)">
+                            <span style="font-weight:700; font-size: 0.85rem;">kcal</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <span style="font-weight: 600;">Protéines</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" id="settings-daily-prot" class="input-dark" style="width: 80px; text-align: right; padding: 8px;" onchange="updateDailyProt(this.value)">
+                            <span style="font-weight:700; font-size: 0.85rem;">g</span>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 600;">Glucides</span>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <input type="number" id="settings-daily-carb" class="input-dark" style="width: 80px; text-align: right; padding: 8px;" onchange="updateDailyCarb(this.value)">
+                            <span style="font-weight:700; font-size: 0.85rem;">g</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; margin-top: 25px;" onclick="toggleSettingsSection('gestion-exercices-content', 'arrow-gestion-exercices')">
+                <h3 style="margin: 0;">Gestion des exercices</h3>
+                <button class="arrow-btn" id="arrow-gestion-exercices" style="pointer-events: none;">▼</button>
+            </div>
+            
+            <div id="gestion-exercices-content" style="display: none; margin-bottom: 25px;">
+                <div class="form-group">
+                    <input type="text" id="new-exercise-name" class="input-dark" placeholder="Ex: Curl biceps, Squat...">
+                    <button class="btn-action" onclick="addExercise()">Créer</button>
+                </div>
+                <div id="exercises-settings-list"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; margin-top: 25px;" onclick="toggleSettingsSection('gestion-routines-content', 'arrow-gestion-routines')">
+                <h3 style="margin: 0;">Mes Séances / Programmes Sportifs</h3>
+                <button class="arrow-btn" id="arrow-gestion-routines" style="pointer-events: none;">▼</button>
+            </div>
+            
+            <div id="gestion-routines-content" style="display: none; margin-bottom: 25px;">
+                <div class="form-group">
+                    <input type="text" id="new-routine-name" class="input-dark" placeholder="Nouvelle séance (ex: Pull, Full Body...)">
+                    <button class="btn-action" onclick="createRoutine()">Créer</button>
+                </div>
+                <div id="routines-settings-list"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; margin-top: 25px;" onclick="toggleSettingsSection('gestion-weekly-habits-content', 'arrow-gestion-weekly-habits')">
+                <h3 style="margin: 0;">Objectifs</h3>
+                <button class="arrow-btn" id="arrow-gestion-weekly-habits" style="pointer-events: none;">▼</button>
+            </div>
+            
+            <div id="gestion-weekly-habits-content" style="display: none; margin-bottom: 25px;">
+                <p style="font-size:0.78rem; color:var(--text-muted); margin-bottom:12px;">Les objectifs quotidiens et de la semaine sont gérés ici. Utilise la fréquence pour distinguer les deux types (ex: 7x = tous les jours).</p>
+                <div style="display:flex; gap:8px; margin-bottom:8px;">
+                    <input type="text" id="new-habit-name" class="input-dark" style="flex:1;" placeholder="Objectif quotidien...">
+                    <button class="btn-action" onclick="addHabit()">+ Quotidien</button>
+                </div>
+                <div style="display:flex; gap:8px; margin-bottom:15px;">
+                    <input type="text" id="new-weekly-habit-name" class="input-dark" style="flex:1;" placeholder="Objectif semaine...">
+                    <button class="btn-action" onclick="addWeeklyHabit()">+ Semaine</button>
+                </div>
+                <div id="settings-list"></div>
+                <div id="weekly-settings-list"></div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; margin-top: 25px;" onclick="toggleSettingsSection('gestion-sets-content', 'arrow-gestion-sets')">
+                <h3 style="margin: 0;">Séries par défaut (Entraînement)</h3>
+                <button class="arrow-btn" id="arrow-gestion-sets" style="pointer-events: none;">▼</button>
+            </div>
+            
+            <div id="gestion-sets-content" style="display: none; margin-bottom: 25px;">
+                <div class="form-group">
+                    <input type="number" id="default-sets-input" class="input-dark" min="1" max="20" style="text-align: center;" placeholder="5">
+                    <button class="btn-action" onclick="updateDefaultSetsCount()">Enregistrer</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-bottom: 15px; margin-top: 25px;" onclick="toggleSettingsSection('gestion-timer-content', 'arrow-gestion-timer')">
+                <h3 style="margin: 0;">Temps de récupération (Chrono)</h3>
+                <button class="arrow-btn" id="arrow-gestion-timer" style="pointer-events: none;">▼</button>
+            </div>
+            
+            <div id="gestion-timer-content" style="display: none; margin-bottom: 25px;">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <input type="number" id="preset-min" class="input-dark" placeholder="Min" min="0" value="1" style="max-width: 80px; text-align: center;">
+                    <input type="number" id="preset-sec" class="input-dark" placeholder="Sec" min="0" max="59" value="30" style="max-width: 80px; text-align: center;">
+                    <button class="btn-action" onclick="addTimerPreset()">+ Preset</button>
+                </div>
+                <div id="presets-settings-list"></div>
+            </div>
+
+
+            <!-- SAUVEGARDE GOOGLE DRIVE -->
+            <h3>Sauvegarde des données</h3>
+            <div class="habit-card" style="border-color: rgba(0, 240, 255, 0.2); background: linear-gradient(to right, rgba(0, 240, 255, 0.03), var(--card-bg)); margin-bottom: 15px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.6;">
+                    Sauvegarde toutes tes données sur Google Drive. En cas de perte de téléphone, tu pourras tout restaurer.
+                </p>
+                <div id="drive-status" style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 12px; min-height: 18px;"></div>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <button class="btn-action" style="background: linear-gradient(135deg, #00f0ff, #0080ff); width: 100%; font-size: 0.9rem;" onclick="driveBackup()">
+                        ☁️ Sauvegarder sur Google Drive
+                    </button>
+                    <button class="btn-action" style="background: linear-gradient(135deg, #7f00ff, #ff007f); width: 100%; font-size: 0.9rem;" onclick="driveRestore()">
+                        ⬇️ Restaurer depuis Google Drive
+                    </button>
+                    <button class="btn-action" style="background: linear-gradient(135deg, #444, #222); width: 100%; font-size: 0.9rem;" onclick="showDriveHistory()">
+                        🕒 Historique des sauvegardes
+                    </button>
+                </div>
+                <div id="drive-history-list" style="margin-top: 12px;"></div>
+            </div>
+
+            <h3>Sécurité & Ajustements</h3>
+            <div class="habit-card" style="border-color: rgba(255, 51, 51, 0.2); background: linear-gradient(to right, rgba(255, 51, 51, 0.02), var(--card-bg));">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
+                    En cas d'oubli ou de mauvaise manipulation, vous pouvez réinitialiser le chronomètre de sport d'aujourd'hui.
+                </p>
+                <button class="btn-action" style="background: var(--danger-color); width: 100%; font-size: 0.9rem;" onclick="resetTodaySessionTimer()">Reset le chronomètre du jour</button>
+            </div>
+
+            <div class="habit-card" style="border-color: rgba(255, 51, 51, 0.4); background: linear-gradient(to right, rgba(255, 51, 51, 0.05), var(--card-bg)); margin-top: 15px;">
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; line-height: 1.4;">
+                    <strong>Zone de danger :</strong> Efface tout l'historique de suivi, vos objectifs personnels, vos records et redémarre les statistiques à zéro à partir d'aujourd'hui.
+                </p>
+                <button class="btn-action" style="background: #ff3333; width: 100%; font-size: 0.9rem; box-shadow: 0 0 15px rgba(255, 51, 51, 0.2);" onclick="resetAllData()">Reset All (Tout réinitialiser)</button>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // NOUVELLES VARIABLES POUR LE TIMESTAMP ET L'AUTO-REPLAY
+        let timerEndTime = 0; 
+        let sessionStartTime = 0; 
+        let sessionBaseTime = 0; 
+        let autoReplay = false;
+        let initialTimerDuration = 90; // Permet de relancer la même durée
+        
+        let appData = {
+            firstDay: "",
+            lastOpenedDate: "",
+            habits: [
+                { id: "h1", name: "Séance de sport" },
+                { id: "h2", name: "Lire" },
+                { id: "h3", name: "Dormir 8h" }
+            ],
+            weeklyHabits: [], 
+            weeklyHistory: {},
+            jourOff: {},
+            vacances: false,
+            vacancesMonthSnapshot: null,
+            _lastMonthPercent: 0,
+            habitOrder: [], 
+            customGoals: [],
+            customAchievements: [], 
+            exercises: [
+                { id: "e1", name: "Curl biceps", type: "pdc" },
+                { id: "e2", name: "Squat", type: "pdc" },
+                { id: "e3", name: "Gainage", type: "temps_sec" }
+            ],
+            routines: [], 
+            timerPresets: [60, 90, 120],
+            defaultTimer: 90,             
+            defaultSetsCount: 5, 
+            history: {},
+            workoutHistory: {},
+            dailyKcalTarget: 2500,
+            dailyProtTarget: 150,
+            dailyCarbTarget: 250,
+            foods: [],
+            nutritionHistory: {}
+        };
+
+        let currentSportDate = "";
+        let currentRoutineFilter = "all"; 
+        let timerInterval = null;
+        let timerSecondsLeft = 90; 
+        let timerRunning = false;
+        let sessionTimerInterval = null;
+        let sessionTimerRunning = false;
+        let expandedExercises = {}; 
+        let performanceTimeFilter = 'jours'; 
+        let nutritionKcalFilter = 'jours';
+        let nutritionWeightFilter = 'jours';
+
+        // GESTION DU RETOUR SUR L'APPLICATION (Visibility Change)
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) {
+                // Mise à jour immédiate du chrono de récupération
+                if (timerRunning) {
+                    const remaining = Math.round((timerEndTime - Date.now()) / 1000);
+                    if (remaining <= 0) {
+                        if (autoReplay) {
+                            const timePassedSinceExpectedEnd = Math.abs(remaining);
+                            const loopsMissed = Math.floor(timePassedSinceExpectedEnd / initialTimerDuration) + 1;
+                            timerEndTime += loopsMissed * (initialTimerDuration * 1000);
+                            timerSecondsLeft = Math.round((timerEndTime - Date.now()) / 1000);
+                            updateTimerDisplay();
+                            updateMediaSessionMetadata();
+                            playTimerBeep(); // Beep pour le retour s'il en a loupé
+                        } else {
+                            clearInterval(timerInterval);
+                            timerRunning = false;
+                            document.getElementById('btn-timer-toggle').innerText = "Lancer la récup";
+                            timerSecondsLeft = initialTimerDuration; 
+                            updateTimerDisplay();
+                            renderTimerPresets();
+                            playTimerBeep(); 
+                            stopMediaSession();
+                        }
+                    } else {
+                        timerSecondsLeft = remaining;
+                        updateTimerDisplay();
+                        updateMediaSessionMetadata();
+                    }
+                }
+                
+                // Mise à jour immédiate du chrono de la séance
+                if (sessionTimerRunning) {
+                    const today = getTodayStr();
+                    if (appData.workoutHistory[today]) {
+                        appData.workoutHistory[today].totalSessionTime = sessionBaseTime + Math.floor((Date.now() - sessionStartTime) / 1000);
+                        updateSessionTimerDisplay();
+                    }
+                }
+            }
+        });
+
+        // MEDIA SESSION API & AUDIO CONTROL
+        function startMediaSession() {
+            const audio = document.getElementById('silent-audio');
+            if(audio) audio.play().catch(e => console.log("Audio background requis interaction utilisateur :", e));
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = "playing";
+                navigator.mediaSession.setActionHandler('play', () => toggleTimer());
+                navigator.mediaSession.setActionHandler('pause', () => toggleTimer());
+                updateMediaSessionMetadata();
+            }
+        }
+
+        function stopMediaSession() {
+            const audio = document.getElementById('silent-audio');
+            if(audio) audio.pause();
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.playbackState = "paused";
+            }
+        }
+
+        function updateMediaSessionMetadata() {
+            if ('mediaSession' in navigator) {
+                const mins = String(Math.floor(timerSecondsLeft / 60)).padStart(2, '0');
+                const secs = String(timerSecondsLeft % 60).padStart(2, '0');
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: `Récupération : ${mins}:${secs}`,
+                    artist: 'PROGRES.',
+                    album: 'Chronomètre Actif',
+                });
+            }
+        }
+
+        // AUTO-REPLAY CONTROL
+        function toggleAutoReplay() {
+            autoReplay = !autoReplay;
+            const btn = document.getElementById('btn-replay-toggle');
+            if(autoReplay) {
+                btn.style.background = 'rgba(255, 0, 127, 0.15)';
+                btn.style.borderColor = '#ff007f';
+                btn.style.color = '#ff007f';
+                btn.style.boxShadow = '0 0 8px rgba(255, 0, 127, 0.3)';
+            } else {
+                btn.style.background = 'var(--gradient-primary)';
+                btn.style.borderColor = 'transparent';
+                btn.style.color = 'white';
+                btn.style.boxShadow = 'none';
+            }
+        }
+
+        // Helper global pour formater les secondes en affichage de temps
+        function formatExTime(val, isMin) {
+            let secs = 0;
+            if (isMin) {
+                const str = String(val);
+                if (str.includes('.')) {
+                    const parts = str.split('.');
+                    const m = parseInt(parts[0]) || 0;
+                    let secStr = parts[1];
+                    if (secStr.length === 1) secStr += '0'; 
+                    const s = parseInt(secStr.substring(0, 2)) || 0;
+                    secs = m * 60 + s;
+                } else {
+                    secs = Math.round((parseFloat(val) || 0) * 60);
+                }
+            } else {
+                secs = Math.round(parseFloat(val) || 0);
+            }
+            
+            if (secs < 60) return secs + ' sec';
+            const m = Math.floor(secs / 60);
+            const s = secs % 60;
+            return s > 0 ? `${m}m${s}s` : `${m}min`;
+        }
+
+        function initStorage() {
+            const local = localStorage.getItem('tracker_progres_data');
+            const todayStr = getTodayStr();
+
+            if (local) {
+                const parsed = JSON.parse(local);
+                if(parsed.exercises) {
+                    parsed.exercises.forEach(ex => { 
+                        if(!ex.type) ex.type = "pdc"; 
+                        if(ex.type === "temps") ex.type = "temps_sec";
+                    });
+                }
+                
+                if(!parsed.exercises) parsed.exercises = [];
+                if(!parsed.customGoals) parsed.customGoals = [];
+                if(!parsed.customAchievements) parsed.customAchievements = [];
+                if(!parsed.workoutHistory) parsed.workoutHistory = {};
+                if(!parsed.timerPresets) parsed.timerPresets = [60, 90, 120];
+                if(!parsed.defaultTimer) parsed.defaultTimer = 90;
+                if(!parsed.defaultSetsCount) parsed.defaultSetsCount = 5; 
+                if(!parsed.weeklyHabits) parsed.weeklyHabits = [];
+                if(!parsed.jourOff) parsed.jourOff = {};
+                if(!parsed.selectedPRs) parsed.selectedPRs = {};
+                if(parsed.vacances === undefined) parsed.vacances = false;
+                if(parsed.vacancesMonthSnapshot === undefined) parsed.vacancesMonthSnapshot = null;
+                if(parsed._lastMonthPercent === undefined) parsed._lastMonthPercent = 0;
+                if(!parsed.dailyCarbTarget) parsed.dailyCarbTarget = 250;
+                // Migration: ajouter freq aux weeklyHabits existants
+                parsed.weeklyHabits = parsed.weeklyHabits.map(wh => ({ freq: 7, ...wh }));
+                // Migration: construire habitOrder si absent
+                if(!parsed.habitOrder || parsed.habitOrder.length === 0) {
+                    parsed.habitOrder = [
+                        ...parsed.habits.map(h => ({ type: 'daily', id: h.id })),
+                        ...parsed.weeklyHabits.map(wh => ({ type: 'weekly', id: wh.id }))
+                    ];
+                }
+                if(!parsed.weeklyHistory) parsed.weeklyHistory = {};
+                if(!parsed.dailyKcalTarget) parsed.dailyKcalTarget = 2500;
+                if(!parsed.dailyProtTarget) parsed.dailyProtTarget = 150;
+                if(!parsed.dailyCarbTarget) parsed.dailyCarbTarget = 250;
+                if(!parsed.foods) parsed.foods = [];
+                if(!parsed.nutritionHistory) parsed.nutritionHistory = {};
+                
+                if(!parsed.lastOpenedDate) parsed.lastOpenedDate = todayStr;
+                
+                if (parsed.lastOpenedDate !== todayStr) {
+                    parsed.customGoals = parsed.customGoals.filter(g => !g.completed);
+                    parsed.lastOpenedDate = todayStr;
+                }
+
+                if(!parsed.routines) {
+                    parsed.routines = [
+                        { id: 'r_chest', name: 'Chest', exercises: [] },
+                        { id: 'r_back', name: 'Back', exercises: [] },
+                        { id: 'r_legs', name: 'Legs', exercises: [] },
+                        { id: 'r_should', name: 'Shoulders', exercises: [] },
+                        { id: 'r_stchest', name: 'Street Chest', exercises: [] },
+                        { id: 'r_stback', name: 'Street Back', exercises: [] },
+                        { id: 'r_vtt', name: 'Préparation VTT', exercises: [] }
+                    ];
+                }
+                
+                appData = parsed;
+            } else {
+                appData.firstDay = todayStr;
+                appData.lastOpenedDate = todayStr;
+                appData.defaultSetsCount = 5;
+                appData.dailyProtTarget = 150;
+                appData.routines = [
+                    { id: 'r_chest', name: 'Chest', exercises: [] },
+                    { id: 'r_back', name: 'Back', exercises: [] },
+                    { id: 'r_legs', name: 'Legs', exercises: [] },
+                    { id: 'r_should', name: 'Shoulders', exercises: [] },
+                    { id: 'r_stchest', name: 'Street Chest', exercises: [] },
+                    { id: 'r_stback', name: 'Street Back', exercises: [] },
+                    { id: 'r_vtt', name: 'Préparation VTT', exercises: [] }
+                ];
+                saveToStorage();
+            }
+            currentSportDate = getTodayStr();
+            timerSecondsLeft = appData.defaultTimer;
+            initialTimerDuration = appData.defaultTimer;
+        }
+
+        function saveToStorage() {
+            localStorage.setItem('tracker_progres_data', JSON.stringify(appData));
+        }
+
+        function getTodayStr() {
+            const d = new Date();
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+
+        function getCurrentWeekKey() {
+            const d = new Date();
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1); 
+            const monday = new Date(d.setDate(diff));
+            return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+        }
+
+        function getWeekKeyForDate(dateStr) {
+            const parts = dateStr.split('-');
+            const d = new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+            const day = d.getDay();
+            const diff = d.getDate() - day + (day === 0 ? -6 : 1);
+            const monday = new Date(d.setDate(diff));
+            return `${monday.getFullYear()}-${String(monday.getMonth() + 1).padStart(2, '0')}-${String(monday.getDate()).padStart(2, '0')}`;
+        }
+
+        function changeSportDate(newDate) {
+            if(!newDate) return;
+            currentSportDate = newDate;
+            renderSport();
+        }
+
+        function getLast30DaysDates() {
+            const dates = [];
+            for (let i = 0; i < 30; i++) {
+                const d = new Date();
+                d.setDate(d.getDate() - i);
+                dates.push(`${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`);
+            }
+            return dates;
+        }
+
+        function getDaysSinceStart() {
+            if (!appData.firstDay) appData.firstDay = getTodayStr();
+            const parts1 = appData.firstDay.split('-');
+            const parts2 = getTodayStr().split('-');
+            const d1 = new Date(parts1[0], parts1[1] - 1, parts1[2]);
+            const d2 = new Date(parts2[0], parts2[1] - 1, parts2[2]);
+            const diffTime = d2 - d1;
+            const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1; 
+            return Math.min(30, Math.max(1, diffDays));
+        }
+
+        function updateCircleProgress(percent, circleId, textId) {
+            const circle = document.getElementById(circleId);
+            const text = document.getElementById(textId);
+            if(!circle || !text) return;
+            const circumference = 2 * Math.PI * 40;
+            const offset = circumference - (percent / 100) * circumference;
+            circle.style.strokeDashoffset = offset;
+            text.innerText = percent + "%";
+        }
+
+        function calculateGlobalStats() {
+            const today = getTodayStr();
+            const last30Days = getLast30DaysDates();
+            const daysToCount = getDaysSinceStart();
+
+            // TOTAL JOUR : base = objectifs quotidiens UNIQUEMENT
+            // Objectifs semaine = bonus PUR : n'entrent dans le calcul QUE s'ils sont cochés
+            const totalDailyHabits = appData.habits.length;
+            let checkedDailyToday = 0;
+            if (appData.history[today]) {
+                appData.habits.forEach(h => {
+                    if (appData.history[today][h.id]) checkedDailyToday++;
+                });
+            }
+            const weekKey = getCurrentWeekKey();
+            let weeklyBonusChecked = 0;
+            appData.weeklyHabits.forEach(wh => {
+                if (isWeeklyHabitDoneToday(wh.id)) weeklyBonusChecked++;
+            });
+            const totalDayPoints = totalDailyHabits + weeklyBonusChecked;
+            const checkedTodayPoints = checkedDailyToday + weeklyBonusChecked;
+            const dayPercent = totalDayPoints > 0 ? Math.round((checkedTodayPoints / totalDayPoints) * 100) : 0;
+            updateCircleProgress(dayPercent, 'circle-day', 'global-day-score');
+
+            // TOTAL MOIS : objectifs quotidiens (1 pt/jour) +
+            // objectifs semaine avec coefficient freq (freq pts/semaine)
+            let totalPossibleTicks = 0;
+            let totalCheckedTicks = 0;
+            for (let i = 0; i < daysToCount; i++) {
+                const dateStr = last30Days[i];
+                if (totalDailyHabits > 0) {
+                    totalPossibleTicks += totalDailyHabits;
+                    if (appData.history[dateStr]) {
+                        appData.habits.forEach(h => {
+                            if (appData.history[dateStr][h.id]) totalCheckedTicks++;
+                        });
+                    }
+                }
+            }
+
+            const uniqueWeeks = new Set();
+            for (let i = 0; i < daysToCount; i++) {
+                uniqueWeeks.add(getWeekKeyForDate(last30Days[i]));
+            }
+
+            // Weekly : possible = freq pts/semaine, checked = nombre de dates cochées (plafonné à freq)
+            let totalWeeklyPossible = 0;
+            let totalWeeklyChecked = 0;
+            uniqueWeeks.forEach(wKey => {
+                appData.weeklyHabits.forEach(wh => {
+                    const freq = wh.freq || 7;
+                    totalWeeklyPossible += freq;
+                    if (appData.weeklyHistory[wKey] && appData.weeklyHistory[wKey][wh.id]) {
+                        const val = appData.weeklyHistory[wKey][wh.id];
+                        let count = 0;
+                        if (typeof val === 'boolean') { count = val ? 1 : 0; }
+                        else if (val && val.dates) { count = val.dates.length; }
+                        totalWeeklyChecked += Math.min(count, freq);
+                    }
+                });
+            });
+
+            const totalPossible = totalPossibleTicks + totalWeeklyPossible;
+            const totalChecked = totalCheckedTicks + totalWeeklyChecked;
+            const computedMonthPercent = totalPossible > 0 ? Math.round((totalChecked / totalPossible) * 100) : 0;
+            appData._lastMonthPercent = computedMonthPercent;
+            const monthPercent = (appData.vacances && appData.vacancesMonthSnapshot !== null && appData.vacancesMonthSnapshot !== undefined)
+                ? appData.vacancesMonthSnapshot
+                : computedMonthPercent;
+            updateCircleProgress(monthPercent, 'circle-month', 'global-month-score');
+        }
+
+        function getIndividualMonthlyPercent(habitId) {
+            const last30Days = getLast30DaysDates();
+            const daysToCount = getDaysSinceStart();
+            let completions = 0;
+            for (let i = 0; i < daysToCount; i++) {
+                const dateStr = last30Days[i];
+                if (appData.history[dateStr] && appData.history[dateStr][habitId]) {
+                    completions++;
+                }
+            }
+            return Math.round((completions / daysToCount) * 100);
+        }
+
+        function getWeeklyIndividualMonthlyPercent(habitId) {
+            const last30Days = getLast30DaysDates();
+            const daysToCount = getDaysSinceStart();
+            const uniqueWeeks = new Set();
+            for (let i = 0; i < daysToCount; i++) {
+                uniqueWeeks.add(getWeekKeyForDate(last30Days[i]));
+            }
+            const habit = appData.weeklyHabits.find(wh => wh.id === habitId);
+            const freq = (habit && habit.freq) || 7;
+            const creationWeek = habit && habit.createdAt ? getWeekKeyForDate(habit.createdAt) : null;
+            let totalRatio = 0;
+            let activeWeeks = 0;
+            uniqueWeeks.forEach(wKey => {
+                if (creationWeek && wKey < creationWeek) return;
+                activeWeeks++;
+                const weekData = appData.weeklyHistory[wKey];
+                if (!weekData || !weekData[habitId]) return;
+                const val = weekData[habitId];
+                let count = 0;
+                if (typeof val === 'boolean') { count = val ? 1 : 0; }
+                else if (val && val.dates) { count = val.dates.length; }
+                totalRatio += Math.min(count / freq, 1);
+            });
+            if (activeWeeks === 0) return 100;
+            return Math.round((totalRatio / activeWeeks) * 100);
+        }
+
+        function getTodayNewPRs() {
+            const today = getTodayStr();
+            let newPRs = [];
+            if(!appData.workoutHistory[today]) return newPRs;
+
+            appData.exercises.forEach(ex => {
+                const isPdc = ex.type === 'pdc';
+                const isTempsSec = ex.type === 'temps_sec' || ex.type === 'temps';
+                const isTempsMin = ex.type === 'temps_min';
+                const isTemps = isTempsSec || isTempsMin;
+                
+                if (isPdc || isTemps) {
+                    let todayMaxReps = 0;
+                    if(appData.workoutHistory[today][ex.id]) {
+                        appData.workoutHistory[today][ex.id].forEach(set => {
+                            if(parseFloat(set.reps) > todayMaxReps) todayMaxReps = parseFloat(set.reps);
+                        });
+                    }
+                    if(todayMaxReps > 0) {
+                        let pastMaxReps = 0;
+                        for (const date in appData.workoutHistory) {
+                            if (date !== today && appData.workoutHistory[date][ex.id]) {
+                                appData.workoutHistory[date][ex.id].forEach(set => {
+                                    if (parseFloat(set.reps) > pastMaxReps) pastMaxReps = parseFloat(set.reps);
+                                });
+                            }
+                        }
+                        if (todayMaxReps > pastMaxReps) {
+                            let valDisplay = isTemps ? formatExTime(todayMaxReps, isTempsMin) : `${todayMaxReps} réps`;
+                            newPRs.push({ name: ex.name, value: valDisplay });
+                        }
+                    }
+                } else {
+                    let todayMax = 0;
+                    if(appData.workoutHistory[today][ex.id]) {
+                        appData.workoutHistory[today][ex.id].forEach(set => {
+                            if(parseFloat(set.weight) > todayMax) todayMax = parseFloat(set.weight);
+                        });
+                    }
+                    if(todayMax > 0) {
+                        let pastMax = 0;
+                        for (const date in appData.workoutHistory) {
+                            if (date !== today && appData.workoutHistory[date][ex.id]) {
+                                appData.workoutHistory[date][ex.id].forEach(set => {
+                                    if (parseFloat(set.weight) > pastMax) pastMax = parseFloat(set.weight);
+                                });
+                            }
+                        }
+                        if (todayMax > pastMax) {
+                            newPRs.push({ name: ex.name, value: `${todayMax} kg` });
+                        }
+                    }
+                }
+            });
+            return newPRs;
+        }
+
+        function getAllPRsForExercise(exId) {
+            // Retourne tous les poids uniques avec leur meilleur nb de reps
+            const allSets = [];
+            for (const date in appData.workoutHistory) {
+                if (appData.workoutHistory[date][exId]) {
+                    appData.workoutHistory[date][exId].forEach(set => {
+                        const w = parseFloat(set.weight) || 0;
+                        const r = parseFloat(set.reps) || 0;
+                        if (r > 0) allSets.push({ weight: w, reps: r });
+                    });
+                }
+            }
+            const uniqueWeights = [...new Set(allSets.map(s => s.weight))].sort((a, b) => b - a);
+            return uniqueWeights.map(w => {
+                const sets = allSets.filter(s => s.weight === w);
+                return { weight: w, reps: Math.max(...sets.map(s => s.reps)) };
+            });
+        }
+
+        // PR sélectionnées manuellement par l'utilisateur : { exId: { heavy: idx, medium: idx, light: idx } }
+        function getSelectedPRs(exId) {
+            if (!appData.selectedPRs) appData.selectedPRs = {};
+            return appData.selectedPRs[exId] || { heavy: 0, medium: 1, light: -1 };
+        }
+
+        function setSelectedPR(exId, slot, allPRs, weightVal) {
+            if (!appData.selectedPRs) appData.selectedPRs = {};
+            if (!appData.selectedPRs[exId]) appData.selectedPRs[exId] = { heavy: 0, medium: 1, light: -1 };
+            const idx = allPRs.findIndex(p => p.weight === weightVal);
+            appData.selectedPRs[exId][slot] = idx;
+            saveToStorage();
+            renderSport();
+            // Fermer le dropdown
+            const dd = document.getElementById('pr-dd-' + exId + '-' + slot);
+            if (dd) dd.style.display = 'none';
+        }
+
+        function togglePRDropdown(exId, slot) {
+            const dd = document.getElementById('pr-dd-' + exId + '-' + slot);
+            if (!dd) return;
+            const isOpen = dd.style.display === 'block';
+            // Fermer tous les autres dropdowns
+            document.querySelectorAll('[id^="pr-dd-"]').forEach(el => el.style.display = 'none');
+            dd.style.display = isOpen ? 'none' : 'block';
+        }
+
+        function getPRsForExercise(exId) {
+            const ex = appData.exercises.find(e => e.id === exId);
+            const isPdcOrTemps = ex && (ex.type === 'pdc' || ex.type === 'temps' || ex.type === 'temps_sec' || ex.type === 'temps_min');
+            
+            let allSets = [];
+            for (const date in appData.workoutHistory) {
+                if (appData.workoutHistory[date][exId]) {
+                    appData.workoutHistory[date][exId].forEach(set => {
+                        const w = parseFloat(set.weight) || 0;
+                        const r = parseFloat(set.reps) || 0;
+                        if (r > 0) {
+                            allSets.push({ weight: w, reps: r });
+                        }
+                    });
+                }
+            }
+
+            let prs = { heavy: { weight: 0, reps: 0 }, medium: { weight: 0, reps: 0 }, light: { weight: 0, reps: 0 } };
+            if (allSets.length === 0) return prs;
+
+            if (isPdcOrTemps) {
+                let uniqueReps = [...new Set(allSets.map(s => s.reps))].sort((a, b) => b - a);
+                prs.heavy = { weight: 0, reps: uniqueReps[0] || 0 };
+                prs.medium = { weight: 0, reps: uniqueReps[1] || 0 };
+                prs.light = { weight: 0, reps: uniqueReps[2] || 0 };
+                return prs;
+            }
+
+            let uniqueWeights = [...new Set(allSets.map(s => s.weight))].sort((a, b) => b - a);
+
+            let maxWeight = uniqueWeights[0];
+            let heavySets = allSets.filter(s => s.weight === maxWeight);
+            prs.heavy = { weight: maxWeight, reps: Math.max(...heavySets.map(s => s.reps)) };
+
+            if (uniqueWeights.length >= 2) {
+                let secondWeight = uniqueWeights[1];
+                let mediumSets = allSets.filter(s => s.weight === secondWeight);
+                prs.medium = { weight: secondWeight, reps: Math.max(...mediumSets.map(s => s.reps)) };
+            }
+
+            if (uniqueWeights.length >= 3) {
+                let minWeight = uniqueWeights[uniqueWeights.length - 1];
+                let lightSets = allSets.filter(s => s.weight === minWeight);
+                prs.light = { weight: minWeight, reps: Math.max(...lightSets.map(s => s.reps)) };
+            }
+            return prs;
+        }
+
+        function renderAccueil() {
+            const today = getTodayStr();
+            const weekKey = getCurrentWeekKey();
+            if (!appData.history[today]) appData.history[today] = {};
+            if (!appData.weeklyHistory[weekKey]) appData.weeklyHistory[weekKey] = {};
+            if (!appData.jourOff) appData.jourOff = {};
+
+            // Afficher date dernière sauvegarde
+            const lastBackup = localStorage.getItem('lastBackupDate');
+            if (lastBackup) setDriveStatus(`Dernière sauvegarde : ${lastBackup}`, 'var(--text-muted)');
+
+            // Checkboxes Jour Off / Vacances
+            const jourOffCb = document.getElementById('jour-off-checkbox');
+            if (jourOffCb) jourOffCb.checked = !!(appData.jourOff && appData.jourOff[today]);
+            const vacancesCb = document.getElementById('vacances-checkbox');
+            if (vacancesCb) vacancesCb.checked = !!appData.vacances;
+
+            const prContainer = document.getElementById('home-pr-display');
+            prContainer.innerHTML = '';
+            
+            const todayPRs = getTodayNewPRs();
+            todayPRs.forEach(pr => {
+                prContainer.innerHTML += `
+                    <div class="pr-banner">
+                        <span class="pr-icon">🏆</span>
+                        <div>
+                            <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#ffd700; letter-spacing:1px;">Succès du jour</div>
+                            <div style="font-size:1rem; font-weight:700; margin-top:2px;">Nouveau PR sur ${pr.name} : ${pr.value} !</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            const completedAchievements = appData.customAchievements.filter(a => a.completed);
+            completedAchievements.forEach(ach => {
+                prContainer.innerHTML += `
+                    <div class="pr-banner">
+                        <span class="pr-icon">🏅</span>
+                        <div>
+                            <div style="font-size:0.75rem; text-transform:uppercase; font-weight:800; color:#00ff66; letter-spacing:1px;">Succès du jour</div>
+                            <div style="font-size:1rem; font-weight:700; margin-top:2px;">${ach.name}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Sync habitOrder avec les habits existants (sécurité)
+            const allIds = [
+                ...appData.habits.map(h => ({ type: 'daily', id: h.id })),
+                ...appData.weeklyHabits.map(wh => ({ type: 'weekly', id: wh.id }))
+            ];
+            allIds.forEach(item => {
+                if (!appData.habitOrder.find(o => o.id === item.id)) appData.habitOrder.push(item);
+            });
+            appData.habitOrder = appData.habitOrder.filter(o =>
+                appData.habits.find(h => h.id === o.id) || appData.weeklyHabits.find(wh => wh.id === o.id)
+            );
+
+            const listContainer = document.getElementById('habits-list');
+            listContainer.innerHTML = '';
+            document.getElementById('weekly-habits-list').innerHTML = '';
+
+            const totalItems = appData.habitOrder.length;
+            if (totalItems === 0) {
+                listContainer.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:10px;">Aucun objectif configuré.</p>`;
+            } else {
+                appData.habitOrder.forEach((orderItem, index) => {
+                    const canUp = index > 0;
+                    const canDown = index < totalItems - 1;
+                    const card = document.createElement('div');
+                    card.className = 'habit-card';
+
+                    if (orderItem.type === 'daily') {
+                        const habit = appData.habits.find(h => h.id === orderItem.id);
+                        if (!habit) return;
+                        const isChecked = appData.history[today][habit.id] ? 'checked' : '';
+                        const monthlyPercent = getIndividualMonthlyPercent(habit.id);
+                        card.innerHTML = `
+                            <div class="habit-main-row" style="align-items:center;">
+                                <div style="display:flex; flex-direction:column; align-items:center; margin-right:8px;">
+                                    <button style="background:none; border:none; padding:1px; color:${canUp ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canUp ? 'pointer' : 'default'}; font-size:0.95rem; line-height:1;" onclick="${canUp ? `moveHabitInOrder(${index}, -1)` : ''}">▲</button>
+                                    <button style="background:none; border:none; padding:1px; color:${canDown ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canDown ? 'pointer' : 'default'}; font-size:0.95rem; line-height:1;" onclick="${canDown ? `moveHabitInOrder(${index}, 1)` : ''}">▼</button>
+                                </div>
+                                <span class="habit-label ${isChecked ? 'completed' : ''}" style="flex:1;">${habit.name}</span>
+                                <input type="checkbox" class="neon-checkbox" ${isChecked} onchange="toggleHabit('${habit.id}', this.checked)">
+                            </div>
+                            <div class="habit-monthly-spec">
+                                <div class="monthly-meta"><span>Régularité mensuelle</span><span>${monthlyPercent}%</span></div>
+                                <div class="monthly-bar-bg"><div class="monthly-bar-fill" style="width:${monthlyPercent}%;"></div></div>
+                            </div>`;
+                    } else {
+                        const habit = appData.weeklyHabits.find(wh => wh.id === orderItem.id);
+                        if (!habit) return;
+                        const count = getWeeklyHabitCount(habit.id);
+                        const freq = habit.freq || 7;
+                        const doneToday = isWeeklyHabitDoneToday(habit.id);
+                        const isCompleted = count >= freq;
+                        const weeklyMonthlyPercent = getWeeklyIndividualMonthlyPercent(habit.id);
+                        card.innerHTML = `
+                            <div class="habit-main-row" style="align-items:center;">
+                                <div style="display:flex; flex-direction:column; align-items:center; margin-right:8px;">
+                                    <button style="background:none; border:none; padding:1px; color:${canUp ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canUp ? 'pointer' : 'default'}; font-size:0.95rem; line-height:1;" onclick="${canUp ? `moveHabitInOrder(${index}, -1)` : ''}">▲</button>
+                                    <button style="background:none; border:none; padding:1px; color:${canDown ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canDown ? 'pointer' : 'default'}; font-size:0.95rem; line-height:1;" onclick="${canDown ? `moveHabitInOrder(${index}, 1)` : ''}">▼</button>
+                                </div>
+                                <div style="flex:1; display:flex; flex-direction:column; gap:1px;">
+                                    <span class="habit-label ${isCompleted ? 'completed' : ''}">${habit.name}</span>
+                                    <span style="font-size:0.75rem; color:${isCompleted ? '#00ff66' : 'var(--text-muted)'}; font-weight:700; margin-left:2px;">${count}/${freq} cette semaine</span>
+                                </div>
+                                <input type="checkbox" class="neon-checkbox" ${doneToday ? 'checked' : ''} onchange="toggleWeeklyHabit('${habit.id}', this.checked)">
+                            </div>
+                            <div class="habit-monthly-spec">
+                                <div class="monthly-meta"><span>Régularité mensuelle</span><span>${weeklyMonthlyPercent}%</span></div>
+                                <div class="monthly-bar-bg"><div class="monthly-bar-fill" style="width:${weeklyMonthlyPercent}%;"></div></div>
+                            </div>`;
+                    }
+                    listContainer.appendChild(card);
+                });
+            }
+
+                        renderCustomGoals();
+        }
+
+
+        // ===== JOUR OFF & VACANCES =====
+        function toggleJourOff(isChecked) {
+            const today = getTodayStr();
+            if (!appData.jourOff) appData.jourOff = {};
+            appData.jourOff[today] = isChecked;
+            saveToStorage();
+            renderAccueil();
+        }
+
+        function toggleVacances(isChecked) {
+            if (isChecked) {
+                appData.vacancesMonthSnapshot = appData._lastMonthPercent || 0;
+            } else {
+                appData.vacancesMonthSnapshot = null;
+            }
+            appData.vacances = isChecked;
+            saveToStorage();
+            renderAccueil();
+            calculateGlobalStats();
+        }
+
+        function isJourOffToday() {
+            const today = getTodayStr();
+            return (appData.jourOff && appData.jourOff[today]) || appData.vacances;
+        }
+
+        // ===== MOVE HABITS (ordre unifié) =====
+        function moveHabitInOrder(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= appData.habitOrder.length) return;
+            const tmp = appData.habitOrder[index];
+            appData.habitOrder[index] = appData.habitOrder[newIndex];
+            appData.habitOrder[newIndex] = tmp;
+            saveToStorage();
+            renderAccueil();
+        }
+        // Compatibilité ancienne API
+        function moveHabit(index, direction) { moveHabitInOrder(index, direction); }
+        function moveWeeklyHabit(index, direction) { moveHabitInOrder(index, direction); }
+
+        // ===== WEEKLY HABIT FREQ =====
+        function setWeeklyHabitFreq(id, freq) {
+            const wh = appData.weeklyHabits.find(w => w.id === id);
+            if (wh) { wh.freq = parseInt(freq) || 7; saveToStorage(); renderParametres(); }
+        }
+
+        // Compter combien de fois un objectif semaine a été validé cette semaine
+        function getWeeklyHabitCount(habitId) {
+            const weekKey = getCurrentWeekKey();
+            const weekData = appData.weeklyHistory[weekKey] || {};
+            // weekData[habitId] peut être un booléen (ancien) ou un objet {dates:[...]}
+            const val = weekData[habitId];
+            if (!val) return 0;
+            if (typeof val === 'boolean') return val ? 1 : 0;
+            if (typeof val === 'object' && val.dates) return val.dates.length;
+            return 0;
+        }
+
+        // Vérifier si l'objectif a déjà été validé aujourd'hui
+        function isWeeklyHabitDoneToday(habitId) {
+            const weekKey = getCurrentWeekKey();
+            const weekData = appData.weeklyHistory[weekKey] || {};
+            const today = getTodayStr();
+            const val = weekData[habitId];
+            if (!val) return false;
+            if (typeof val === 'boolean') return val;
+            if (typeof val === 'object' && val.dates) return val.dates.includes(today);
+            return false;
+        }
+
+        function toggleHabit(habitId, isChecked) {
+            const today = getTodayStr();
+            if (!appData.history[today]) appData.history[today] = {};
+            appData.history[today][habitId] = isChecked;
+            saveToStorage();
+            calculateGlobalStats();
+            renderAccueil();
+        }
+
+        function toggleWeeklyHabit(habitId, isChecked) {
+            const weekKey = getCurrentWeekKey();
+            const today = getTodayStr();
+            if (!appData.weeklyHistory[weekKey]) appData.weeklyHistory[weekKey] = {};
+            const current = appData.weeklyHistory[weekKey][habitId];
+            let dates = [];
+            if (current && typeof current === 'object' && current.dates) {
+                dates = [...current.dates];
+            } else if (current === true) {
+                dates = []; // migration ancien format
+            }
+            if (isChecked) {
+                if (!dates.includes(today)) dates.push(today);
+            } else {
+                dates = dates.filter(d => d !== today);
+            }
+            appData.weeklyHistory[weekKey][habitId] = { dates };
+            saveToStorage();
+            calculateGlobalStats();
+            renderAccueil();
+        }
+
+        function toggleAddCustomGoalForm() {
+            const form = document.getElementById('custom-goal-form');
+            form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function saveCustomGoal() {
+            const input = document.getElementById('custom-goal-input');
+            const name = input.value.trim();
+            if(!name) return;
+            appData.customGoals.push({ id: 'cg_' + Date.now(), name: name, completed: false });
+            input.value = '';
+            toggleAddCustomGoalForm();
+            saveToStorage();
+            renderCustomGoals();
+        }
+
+        function renderCustomGoals() {
+            const container = document.getElementById('custom-goals-list');
+            container.innerHTML = '';
+            if(appData.customGoals.length === 0) {
+                container.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:20px; background: var(--card-bg); border-radius:18px; border:1px dashed var(--border-color);">Aucun objectif personnel en cours.</p>`;
+                return;
+            }
+            appData.customGoals.forEach(goal => {
+                const isChecked = goal.completed ? 'checked' : '';
+                const card = document.createElement('div');
+                card.className = 'habit-card';
+                card.innerHTML = `
+                    <div class="habit-main-row" style="margin-bottom: 0;">
+                        <span class="habit-label ${isChecked ? 'completed' : ''}">${goal.name}</span>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <input type="checkbox" class="neon-checkbox" ${isChecked} onchange="toggleCustomGoal('${goal.id}', this.checked)">
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function toggleCustomGoal(id, isChecked) {
+            const goal = appData.customGoals.find(g => g.id === id);
+            if(goal) { goal.completed = isChecked; saveToStorage(); renderCustomGoals(); }
+        }
+
+        function toggleAddAchievementForm() {
+            const form = document.getElementById('achievement-custom-form');
+            form.style.display = form.style.display === 'none' ? 'flex' : 'none';
+        }
+
+        function saveCustomAchievement() {
+            const input = document.getElementById('achievement-custom-input');
+            const name = input.value.trim();
+            if(!name) return;
+            appData.customAchievements.push({ id: 'ach_' + Date.now(), name: name, completed: false });
+            input.value = '';
+            toggleAddAchievementForm();
+            saveToStorage();
+            renderSuccesPage();
+            renderAccueil();
+        }
+
+        function toggleCustomAchievement(id, isChecked) {
+            const ach = appData.customAchievements.find(a => a.id === id);
+            if(ach) { ach.completed = isChecked; saveToStorage(); renderSuccesPage(); renderAccueil(); }
+        }
+
+        function deleteCustomAchievement(id) {
+            if(confirm("Supprimer définitivement ce trophée ?")) {
+                appData.customAchievements = appData.customAchievements.filter(a => a.id !== id);
+                saveToStorage();
+                renderSuccesPage();
+                renderAccueil();
+            }
+        }
+
+        function renderSuccesPage() {
+            const container = document.getElementById('achievements-container');
+            container.innerHTML = '';
+            let completedCount = 0;
+            
+            if(appData.customAchievements.length > 0) {
+                appData.customAchievements.forEach(ach => {
+                    const isDone = ach.completed;
+                    if(isDone) completedCount++;
+                    const card = document.createElement('div');
+                    card.className = 'habit-card';
+                    card.style.border = isDone ? '1px solid rgba(0, 255, 102, 0.2)' : '1px solid var(--border-color)';
+                    card.style.background = isDone ? 'linear-gradient(to right, rgba(0, 255, 102, 0.02), var(--card-bg))' : 'var(--card-bg)';
+                    card.innerHTML = `
+                        <div style="display:flex; align-items:center; justify-content:space-between;">
+                            <div style="display:flex; align-items:center; gap:15px; width:70%;">
+                                <input type="checkbox" class="neon-checkbox" ${isDone ? 'checked' : ''} onchange="toggleCustomAchievement('${ach.id}', this.checked)">
+                                <span class="habit-label ${isDone ? 'completed' : ''}" style="font-size:1.05rem; font-weight:700;">${ach.name}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:0.65rem; text-transform:uppercase; font-weight:800; padding:3px 6px; border-radius:4px; background:${isDone ? 'rgba(0,255,102,0.1)' : 'rgba(255,255,255,0.05)'}; color:${isDone ? '#00ff66' : 'var(--text-muted)'}">
+                                    ${isDone ? '✔ Débloqué' : '🔒 En attente'}
+                                </span>
+                                <button class="btn-delete" onclick="deleteCustomAchievement('${ach.id}')">✕</button>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+            
+            const tCountEl = document.getElementById('trophies-count');
+            if(tCountEl) tCountEl.innerText = completedCount;
+        }
+
+        // --- GESTION DU CHRONO DE SÉANCE AU TIMESTAMP ---
+        function updateSessionTimerDisplay() {
+            const targetDate = currentSportDate || getTodayStr();
+            if(!appData.workoutHistory[targetDate]) appData.workoutHistory[targetDate] = {};
+            if(appData.workoutHistory[targetDate].totalSessionTime === undefined) appData.workoutHistory[targetDate].totalSessionTime = 0;
+
+            const totalSecs = appData.workoutHistory[targetDate].totalSessionTime;
+            const hrs = String(Math.floor(totalSecs / 3600)).padStart(2, '0');
+            const mins = String(Math.floor((totalSecs % 3600) / 60)).padStart(2, '0');
+            const secs = String(totalSecs % 60).padStart(2, '0');
+
+            const displayEl = document.getElementById('session-timer-display');
+            if (displayEl) displayEl.innerText = `${hrs}:${mins}:${secs}`;
+        }
+
+        function toggleSessionTimer() {
+            const btn = document.getElementById('btn-session-timer-toggle');
+            const today = getTodayStr();
+            if (currentSportDate !== today) {
+                alert("Le chrono ne peut être lancé que pour la journée d'aujourd'hui !");
+                return;
+            }
+            
+            if (!appData.workoutHistory[today]) appData.workoutHistory[today] = {};
+            if (appData.workoutHistory[today].totalSessionTime === undefined) appData.workoutHistory[today].totalSessionTime = 0;
+
+            if (sessionTimerRunning) {
+                // Pause du chrono de séance
+                clearInterval(sessionTimerInterval);
+                sessionTimerRunning = false;
+                
+                // On fige le temps final
+                appData.workoutHistory[today].totalSessionTime = sessionBaseTime + Math.floor((Date.now() - sessionStartTime) / 1000);
+                updateSessionTimerDisplay();
+                
+                if(btn) btn.innerText = "Reprendre la séance";
+                saveToStorage();
+                renderAccueil();
+            } else {
+                // Lancement / Reprise du chrono
+                sessionTimerRunning = true;
+                if(btn) btn.innerText = "Pause";
+                
+                sessionBaseTime = appData.workoutHistory[today].totalSessionTime;
+                sessionStartTime = Date.now();
+                
+                // Intervalle ultra rapide pour un affichage fluide
+                sessionTimerInterval = setInterval(() => {
+                    const newTotal = sessionBaseTime + Math.floor((Date.now() - sessionStartTime) / 1000);
+                    if (newTotal !== appData.workoutHistory[today].totalSessionTime) {
+                        appData.workoutHistory[today].totalSessionTime = newTotal;
+                        updateSessionTimerDisplay();
+                        
+                        // Sauvegarde moins fréquente en cache (toutes les 5 secondes)
+                        if(newTotal % 5 === 0) saveToStorage();
+                    }
+                }, 500); 
+            }
+        }
+
+        function resetTodaySessionTimer() {
+            const today = getTodayStr();
+            if (confirm("⚠️ Voulez-vous vraiment réinitialiser le chronomètre de séance pour aujourd'hui ?")) {
+                if (sessionTimerRunning) { clearInterval(sessionTimerInterval); sessionTimerRunning = false; }
+                if (!appData.workoutHistory[today]) appData.workoutHistory[today] = {};
+                
+                appData.workoutHistory[today].totalSessionTime = 0;
+                sessionBaseTime = 0;
+                sessionStartTime = Date.now(); 
+                
+                saveToStorage();
+                updateSessionTimerDisplay();
+                
+                const btn = document.getElementById('btn-session-timer-toggle');
+                if(btn && currentSportDate === today) btn.innerText = "Lancer la séance";
+            }
+        }
+
+        function resetAllData() {
+            if (confirm("⚠️ ATTENTION : Vous allez effacer TOUT votre historique.\nVoulez-vous continuer ?")) {
+                if (sessionTimerRunning) { clearInterval(sessionTimerInterval); sessionTimerRunning = false; }
+                if (timerRunning) { clearInterval(timerInterval); timerRunning = false; }
+
+                appData.firstDay = getTodayStr();
+                appData.lastOpenedDate = getTodayStr();
+                appData.history = {};
+                appData.weeklyHistory = {};
+                appData.workoutHistory = {};
+                appData.customGoals = [];
+                appData.customAchievements = [];
+                appData.nutritionHistory = {};
+
+                saveToStorage();
+                calculateGlobalStats();
+                navigateTo('accueil');
+                alert("💥 Toutes les données ont été nettoyées.");
+            }
+        }
+
+        // --- GESTION DU CHRONO DE RÉCUPÉRATION AU TIMESTAMP ---
+        function updateTimerDisplay() {
+            const mins = String(Math.floor(timerSecondsLeft / 60)).padStart(2, '0');
+            const secs = String(timerSecondsLeft % 60).padStart(2, '0');
+            document.getElementById('timer-display').innerText = `${mins}:${secs}`;
+        }
+
+        function renderTimerPresets() {
+            const container = document.getElementById('timer-presets-container');
+            container.innerHTML = '';
+            const sortedPresets = [...appData.timerPresets].sort((a,b) => a - b);
+            sortedPresets.forEach(sec => {
+                const m = Math.floor(sec / 60);
+                const s = sec % 60;
+                let label = m > 0 ? `${m}m` : '';
+                if(s > 0) label += `${s}s`;
+                if(sec === appData.defaultTimer) label += ' 👑';
+                const isCurrentActive = sec === timerSecondsLeft && !timerRunning ? 'style="border-color:#00f0ff; color:#00f0ff; background:rgba(0,240,255,0.05);"' : '';
+                container.innerHTML += `<button class="btn-timer-preset" ${isCurrentActive} onclick="setTimer(${sec})">${label}</button>`;
+            });
+        }
+
+        function setTimer(seconds) {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            document.getElementById('btn-timer-toggle').innerText = "Lancer la récup";
+            timerSecondsLeft = seconds;
+            initialTimerDuration = seconds; // Mémoriser pour le mode Replay
+            updateTimerDisplay();
+            renderTimerPresets();
+            stopMediaSession();
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('btn-timer-toggle');
+            if (timerRunning) {
+                // Pause du chrono
+                clearInterval(timerInterval);
+                timerRunning = false;
+                timerSecondsLeft = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+                updateTimerDisplay();
+                btn.innerText = "Reprendre";
+                stopMediaSession();
+            } else {
+                // Démarrer ou reprendre
+                timerRunning = true;
+                btn.innerText = "Pause";
+                if(timerSecondsLeft === 0) timerSecondsLeft = initialTimerDuration;
+                timerEndTime = Date.now() + (timerSecondsLeft * 1000);
+                
+                startMediaSession();
+                
+                timerInterval = setInterval(() => {
+                    const remaining = Math.round((timerEndTime - Date.now()) / 1000);
+                    if (remaining > 0) {
+                        timerSecondsLeft = remaining;
+                        updateTimerDisplay();
+                        updateMediaSessionMetadata();
+                    } else {
+                        // Fin du chrono
+                        playTimerBeep(); 
+                        if (autoReplay) {
+                            timerSecondsLeft = initialTimerDuration;
+                            timerEndTime = Date.now() + (timerSecondsLeft * 1000);
+                            updateTimerDisplay();
+                            updateMediaSessionMetadata();
+                        } else {
+                            clearInterval(timerInterval);
+                            timerRunning = false;
+                            btn.innerText = "Lancer la récup";
+                            timerSecondsLeft = initialTimerDuration; 
+                            updateTimerDisplay();
+                            renderTimerPresets();
+                            stopMediaSession();
+                        }
+                    }
+                }, 250); 
+            }
+        }
+
+        function playTimerBeep() {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.type = "sine";
+                osc.frequency.value = 880; 
+                gain.gain.setValueAtTime(0.4, ctx.currentTime);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.3); 
+            } catch (e) { }
+        }
+
+        function renderWeekPlanner() {
+            const daysShort = ['D', 'L', 'M', 'M', 'J', 'V', 'S'];
+            const workoutDays = [1, 2, 3, 5, 6]; 
+            const currentDayIndex = new Date().getDay();
+            const container = document.getElementById('week-planner-container');
+            container.innerHTML = '';
+            const order = [1, 2, 3, 4, 5, 6, 0];
+            order.forEach(index => {
+                const isWorkout = workoutDays.includes(index);
+                const isToday = index === currentDayIndex;
+                let classes = 'day-badge';
+                if(isWorkout) classes += ' workout';
+                if(isToday) classes += ' today';
+                container.innerHTML += `<div class="${classes}"><div class="day-circle">${daysShort[index]}</div></div>`;
+            });
+        }
+
+        function renameExercisePrompt(exId) {
+            const ex = appData.exercises.find(e => e.id === exId);
+            if (!ex) return;
+            const newName = prompt("Renommer l'exercice :", ex.name);
+            if (newName && newName.trim() !== "") {
+                ex.name = newName.trim();
+                saveToStorage();
+                renderSport(); 
+                renderParametres();
+            }
+        }
+
+        function setExerciseType(exId, newType) {
+            const ex = appData.exercises.find(e => e.id === exId);
+            if(ex) {
+                ex.type = newType;
+                saveToStorage();
+                renderParametres();
+                if (document.getElementById('page-sport').classList.contains('active')) renderSport(); 
+            }
+        }
+
+        function moveExInRoutine(routId, index, dir) {
+            const rout = appData.routines.find(r => r.id === routId);
+            if (!rout) return;
+            const newIndex = index + dir;
+            if (newIndex < 0 || newIndex >= rout.exercises.length) return;
+            
+            const temp = rout.exercises[index];
+            rout.exercises[index] = rout.exercises[newIndex];
+            rout.exercises[newIndex] = temp;
+            
+            saveToStorage();
+            renderParametres();
+            if (document.getElementById('page-sport').classList.contains('active')) {
+                renderSport();
+            }
+        }
+
+        function moveExerciseGlobal(index, dir) {
+            const newIndex = index + dir;
+            if (newIndex < 0 || newIndex >= appData.exercises.length) return;
+            
+            const temp = appData.exercises[index];
+            appData.exercises[index] = appData.exercises[newIndex];
+            appData.exercises[newIndex] = temp;
+            
+            saveToStorage();
+            if (document.getElementById('page-performance').classList.contains('active')) {
+                renderPerformance();
+            }
+        }
+
+        function changeRoutineFilter(val) {
+            currentRoutineFilter = val;
+            renderSport();
+        }
+
+        function renderSport() {
+            const today = currentSportDate; 
+            if (!appData.workoutHistory[today]) appData.workoutHistory[today] = {};
+            updateSessionTimerDisplay();
+            
+            const btnSession = document.getElementById('btn-session-timer-toggle');
+            if(btnSession) {
+                if(currentSportDate !== getTodayStr()) {
+                    btnSession.innerText = "Verrouillé";
+                    btnSession.disabled = true;
+                    btnSession.style.opacity = "0.4";
+                } else {
+                    btnSession.disabled = false;
+                    btnSession.style.opacity = "1";
+                    btnSession.innerText = sessionTimerRunning ? "Pause" : (appData.workoutHistory[today].totalSessionTime > 0 ? "Reprendre" : "Lancer la séance");
+                }
+            }
+
+            const routineSelect = document.getElementById('routine-filter');
+            routineSelect.innerHTML = `<option value="all">🏋️‍♂️ Afficher tous les exercices</option>`;
+            appData.routines.forEach(rout => {
+                routineSelect.innerHTML += `<option value="${rout.id}" ${currentRoutineFilter === rout.id ? 'selected' : ''}>🎯 Séance : ${rout.name}</option>`;
+            });
+            
+            let exercisesToRender = appData.exercises;
+            if (currentRoutineFilter !== "all") {
+                const selectedRoutine = appData.routines.find(r => r.id === currentRoutineFilter);
+                if (selectedRoutine) {
+                    exercisesToRender = selectedRoutine.exercises.map(exId => appData.exercises.find(e => e.id === exId)).filter(Boolean);
+                }
+            }
+            
+            const container = document.getElementById('exercises-list');
+            container.innerHTML = '';
+            
+            if(exercisesToRender.length === 0) {
+                if (currentRoutineFilter === "all") {
+                    container.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:20px;">Aucun exercice créé.</p>`;
+                } else {
+                    container.innerHTML = `<p style="color:var(--text-muted);text-align:center;padding:20px;">Aucun exercice n'a encore été ajouté à cette séance.</p>`;
+                }
+                return;
+            }
+            
+            exercisesToRender.forEach((ex, exIndex) => {
+                const prs = getPRsForExercise(ex.id);
+                const isPdc = ex.type === 'pdc';
+                const isTempsSec = ex.type === 'temps_sec' || ex.type === 'temps';
+                const isTempsMin = ex.type === 'temps_min';
+                const isTemps = isTempsSec || isTempsMin;
+                
+                if (!appData.workoutHistory[today][ex.id] || appData.workoutHistory[today][ex.id].length === 0) {
+                    appData.workoutHistory[today][ex.id] = [];
+                    const count = appData.defaultSetsCount || 5;
+                    for (let i = 0; i < count; i++) {
+                        appData.workoutHistory[today][ex.id].push({ reps: 0, weight: 0 });
+                    }
+                }
+                
+                const sets = appData.workoutHistory[today][ex.id];
+                const card = document.createElement('div');
+                card.className = 'exercise-card';
+                let setsHTML = '';
+                
+                sets.forEach((set, sIndex) => {
+                    let inputHTML = '';
+                    if (isTemps) {
+                        inputHTML = `
+                            <div class="set-input-group">
+                                <input type="number" step="any" value="${set.reps || ''}" placeholder="0" oninput="updateSet('${ex.id}', ${sIndex}, 'reps', this.value)">
+                                <span>${isTempsMin ? 'min' : 'sec'}</span>
+                            </div>
+                        `;
+                    } else {
+                        const weightInputHTML = isPdc ? '' : `
+                            <div class="set-input-group">
+                                <input type="number" step="any" value="${set.weight || ''}" placeholder="0" oninput="updateSet('${ex.id}', ${sIndex}, 'weight', this.value)">
+                                <span>kg</span>
+                            </div>
+                        `;
+                        inputHTML = `
+                            <div class="set-input-group">
+                                <input type="number" step="any" value="${set.reps || ''}" placeholder="0" oninput="updateSet('${ex.id}', ${sIndex}, 'reps', this.value)">
+                                <span>réps</span>
+                            </div>
+                            ${weightInputHTML}
+                        `;
+                    }
+
+                    setsHTML += `
+                        <div class="set-row">
+                            <div class="set-label">Série ${sIndex + 1}</div>
+                            ${inputHTML}
+                            <button class="btn-delete" style="font-size:1.1rem;" onclick="deleteSet('${ex.id}', ${sIndex})">✕</button>
+                        </div>
+                    `;
+                });
+                
+                const isExpanded = expandedExercises[ex.id] ? 'open' : '';
+                
+                let heavyDisplay = '';
+                let mediumDisplay = '';
+                let lightDisplay = '';
+
+                if (isTemps) {
+                    heavyDisplay = prs.heavy.reps > 0 ? formatExTime(prs.heavy.reps, isTempsMin) : '-';
+                } else if (isPdc) {
+                    heavyDisplay = prs.heavy.reps > 0 ? prs.heavy.reps + ' réps' : '-';
+                } else {
+                    heavyDisplay = prs.heavy.weight > 0 ? prs.heavy.weight + ' kg<span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">x' + prs.heavy.reps + '</span>' : '-';
+                    mediumDisplay = prs.medium.weight > 0 ? prs.medium.weight + ' kg<span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">x' + prs.medium.reps + '</span>' : '-';
+                    lightDisplay = prs.light.weight > 0 ? prs.light.weight + ' kg<span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">x' + prs.light.reps + '</span>' : '-';
+                }
+
+                const labelHeavy = (isPdc || isTemps) ? "Max" : "Lourd";
+                const labelMedium = "Moyen";
+                const labelLight = "Léger";
+
+                let prBadgesHTML = '';
+                if (isPdc || isTemps) {
+                    prBadgesHTML = `
+                        <div class="pr-badge">
+                            <span class="icon">🏆</span>
+                            <div class="weight" style="color:#ffd700;">${heavyDisplay}</div>
+                            <div class="type">${labelHeavy}</div>
+                        </div>
+                    `;
+                } else {
+                    // PR cliquables avec dropdown
+                    const allPRsList = getAllPRsForExercise(ex.id);
+                    const selPRs = getSelectedPRs(ex.id);
+                    const slots = [
+                        { slot: 'heavy', icon: '🏆', label: 'Lourd', color: 'var(--gradient-gold)', colorStyle: 'background:var(--gradient-gold);-webkit-background-clip:text;-webkit-text-fill-color:transparent;' },
+                        { slot: 'medium', icon: '🥈', label: 'Moyen', colorStyle: 'color:#c0c0c0;' },
+                        { slot: 'light', icon: '🥉', label: 'Léger', colorStyle: 'color:#cd7f32;' }
+                    ];
+                    prBadgesHTML = slots.map(s => {
+                        const idx = selPRs[s.slot] !== undefined ? selPRs[s.slot] : (s.slot === 'heavy' ? 0 : s.slot === 'medium' ? 1 : 2);
+                        const pr = allPRsList[idx];
+                        const display = pr ? pr.weight + ' kg<span style="font-size:0.75rem;color:var(--text-muted);font-weight:normal;">x' + pr.reps + '</span>' : '-';
+                        const ddOptions = allPRsList.map((p, i) => 
+                            '<div onclick="setSelectedPR(\''+ex.id+'\',\''+s.slot+'\',getAllPRsForExercise(\''+ex.id+'\'),'+p.weight+')" style="padding:10px 14px;cursor:pointer;font-size:0.85rem;border-bottom:1px solid rgba(255,255,255,0.05);" onmouseover="this.style.background=\'rgba(255,255,255,0.06)\'" onmouseout="this.style.background=\'\'">'
+                            +p.weight+' kg × '+p.reps+'</div>'
+                        ).join('');
+                        return '<div class="pr-badge" style="position:relative;">'
+                            +'<span class="icon">'+s.icon+'</span>'
+                            +'<div class="weight" style="'+s.colorStyle+' cursor:pointer;" onclick="togglePRDropdown(\''+ex.id+'\',\''+s.slot+'\')">'
+                            +display+'</div>'
+                            +'<div class="type">'+s.label+'</div>'
+                            +(allPRsList.length > 1 ? '<div id="pr-dd-'+ex.id+'-'+s.slot+'" style="display:none;position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);min-width:150px;background:var(--card-bg);border:1px solid var(--border-color);border-radius:10px;z-index:100;overflow:hidden;box-shadow:0 8px 20px rgba(0,0,0,0.6);">'
+                            +'<div style="padding:6px 10px;font-size:0.7rem;color:var(--text-muted);text-transform:uppercase;font-weight:700;border-bottom:1px solid rgba(255,255,255,0.05);">Choisir PR</div>'
+                            +ddOptions+'</div>' : '')
+                            +'</div>';
+                    }).join('');
+                }
+
+                let moveButtonsHTML = '';
+                if (currentRoutineFilter !== "all") {
+                    const canMoveUp = exIndex > 0;
+                    const canMoveDown = exIndex < exercisesToRender.length - 1;
+                    moveButtonsHTML = `
+                        <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; margin-right:12px; margin-left:-5px;">
+                            <button style="background:none; border:none; padding:2px; color:${canMoveUp ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canMoveUp ? 'pointer' : 'default'}; font-size:1.1rem; line-height:0.8;" onclick="${canMoveUp ? `moveExInRoutine('${currentRoutineFilter}', ${exIndex}, -1)` : ''}">▲</button>
+                            <button style="background:none; border:none; padding:2px; color:${canMoveDown ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canMoveDown ? 'pointer' : 'default'}; font-size:1.1rem; line-height:0.8;" onclick="${canMoveDown ? `moveExInRoutine('${currentRoutineFilter}', ${exIndex}, 1)` : ''}">▼</button>
+                        </div>
+                    `;
+                }
+                
+                card.innerHTML = `
+                    <div class="exercise-header">
+                        ${moveButtonsHTML}
+                        <div style="flex: 1; display:flex; align-items:center; gap:8px;">
+                            <div class="exercise-title">${ex.name}</div>
+                            <button style="background:none; border:none; color:var(--text-muted); font-size:1rem; cursor:pointer;" onclick="renameExercisePrompt('${ex.id}')">✏️</button>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:15px; margin-left:10px;">
+                            <button class="btn-add-set" onclick="addSetRow('${ex.id}')">+</button>
+                            <button class="arrow-btn ${isExpanded}" id="arrow-${ex.id}" onclick="toggleExerciseDetails('${ex.id}')">▼</button>
+                        </div>
+                    </div>
+                    
+                    <div class="exercise-prs">
+                        ${prBadgesHTML}
+                    </div>
+
+                    <div class="graph-container ${isExpanded}" id="graph-${ex.id}">
+                        <div class="graph-bars" id="graph-bars-${ex.id}"></div>
+                        <div class="graph-labels" id="graph-labels-${ex.id}"></div>
+                    </div>
+                    
+                    <div class="sets-management ${isExpanded}" id="sets-${ex.id}">${setsHTML}</div>
+                `;
+                container.appendChild(card);
+                
+                if(expandedExercises[ex.id]) {
+                    buildGraphData(ex.id);
+                }
+            });
+        }
+
+        function toggleExerciseDetails(exId) {
+            const graphEl = document.getElementById(`graph-${exId}`);
+            const setsEl = document.getElementById(`sets-${exId}`);
+            const arrowEl = document.getElementById(`arrow-${exId}`);
+            
+            const isOpen = graphEl.classList.toggle('open');
+            setsEl.classList.toggle('open', isOpen);
+            arrowEl.classList.toggle('open', isOpen);
+            
+            expandedExercises[exId] = isOpen;
+            
+            if (isOpen) buildGraphData(exId);
+        }
+
+        function addExercise() {
+            const input = document.getElementById('new-exercise-name');
+            const name = input.value.trim();
+            if (!name) return;
+            const newId = 'e_' + Date.now();
+            appData.exercises.push({ id: newId, name: name, type: "pdc" });
+            
+            input.value = '';
+            saveToStorage();
+            renderSport();
+            renderParametres();
+        }
+
+        function deleteExercise(exId) {
+            if(confirm("Supprimer cet exercice et tout son historique ?")) {
+                appData.exercises = appData.exercises.filter(ex => ex.id !== exId);
+                
+                appData.routines.forEach(rout => {
+                    rout.exercises = rout.exercises.filter(id => id !== exId);
+                });
+                
+                for (let date in appData.workoutHistory) {
+                    delete appData.workoutHistory[date][exId];
+                }
+                
+                saveToStorage();
+                renderParametres();
+                renderSport();
+            }
+        }
+
+        function addSetRow(exId) {
+            const today = currentSportDate;
+            expandedExercises[exId] = true;
+            appData.workoutHistory[today][exId].push({ reps: 0, weight: 0 });
+            saveToStorage();
+            renderSport();
+        }
+
+        function updateSet(exId, index, field, value) {
+            const today = currentSportDate;
+            appData.workoutHistory[today][exId][index][field] = parseFloat(value) || 0;
+            saveToStorage();
+            if(document.getElementById(`graph-${exId}`).classList.contains('open')) buildGraphData(exId);
+        }
+
+        function deleteSet(exId, index) {
+            const today = currentSportDate;
+            appData.workoutHistory[today][exId].splice(index, 1);
+            saveToStorage();
+            renderSport();
+        }
+
+        function buildGraphData(exId) {
+            const last5Days = getLast30DaysDates().slice(0, 5).reverse(); 
+            const barsContainer = document.getElementById(`graph-bars-${exId}`);
+            const labelsContainer = document.getElementById(`graph-labels-${exId}`);
+            if(!barsContainer || !labelsContainer) return;
+            
+            const ex = appData.exercises.find(e => e.id === exId);
+            const isPdc = ex && ex.type === 'pdc';
+            const isTempsSec = ex && (ex.type === 'temps_sec' || ex.type === 'temps');
+            const isTempsMin = ex && ex.type === 'temps_min';
+            const isTemps = isTempsSec || isTempsMin;
+
+            barsContainer.innerHTML = '';
+            labelsContainer.innerHTML = '';
+            // Trouver les 5 dernières dates où cet exercice a été UTILISÉ (données non nulles)
+            const allDatesWithEx = Object.keys(appData.workoutHistory)
+                .filter(d => {
+                    const sets = appData.workoutHistory[d][exId];
+                    return sets && sets.some(s => (parseFloat(s.reps) || 0) > 0 || (parseFloat(s.weight) || 0) > 0);
+                })
+                .sort()
+                .slice(-5); // 5 dernières utilisations
+
+            let dataTonnages = [];
+            allDatesWithEx.forEach(dateStr => {
+                let totalVolume = 0;
+                appData.workoutHistory[dateStr][exId].forEach(s => {
+                    let mult = (ex && ex.type === 'haltere') ? 2 : 1;
+                    totalVolume += (isPdc || isTemps) ? (parseFloat(s.reps) || 0) : ((parseFloat(s.reps) || 0) * (parseFloat(s.weight) || 0) * mult);
+                });
+                // Label date : jj/mm
+                const parts = dateStr.split('-');
+                const dateLabel = parts[2] + '/' + parts[1];
+                dataTonnages.push({ date: dateLabel, tonnage: totalVolume });
+            });
+            const maxTonnage = Math.max(...dataTonnages.map(d => d.tonnage), 1);
+            dataTonnages.forEach(d => {
+                const pxHeight = (d.tonnage / maxTonnage) * 75;
+                let displayWeight = d.tonnage > 0 ? (isTemps ? formatExTime(d.tonnage, isTempsMin) : (isPdc ? `${d.tonnage}r` : `${d.tonnage}k`)) : '0';
+                barsContainer.innerHTML += `
+                    <div class="graph-bar-wrapper">
+                        <span style="font-size:0.6rem; margin-bottom:2px; color:var(--text-muted);">${displayWeight}</span>
+                        <div class="graph-bar-fill" style="height: ${Math.max(5, pxHeight)}px;"></div>
+                    </div>
+                `;
+                labelsContainer.innerHTML += `<div style="flex:1; font-size:0.6rem;">${d.date}</div>`;
+            });
+        }
+
+        function filterPerformanceTime(mode) {
+            performanceTimeFilter = mode;
+            renderPerformance();
+        }
+
+        function renderPerformance() {
+            const currentYear = new Date().getFullYear();
+            let totalYearlySeconds = 0;
+            let totalYearlyKilos = 0;
+
+            for (const dateKey in appData.workoutHistory) {
+                if (dateKey.startsWith(`${currentYear}-`)) {
+                    const dayData = appData.workoutHistory[dateKey];
+                    totalYearlySeconds += (dayData.totalSessionTime || 0);
+                    
+                    for (const exId in dayData) {
+                        if (exId === 'totalSessionTime') continue;
+                        const ex = appData.exercises.find(e => e.id === exId);
+                        if (ex && (ex.type === 'leste' || ex.type === 'haltere')) {
+                            dayData[exId].forEach(set => {
+                                const w = parseFloat(set.weight) || 0;
+                                const r = parseFloat(set.reps) || 0;
+                                const mult = ex.type === 'haltere' ? 2 : 1;
+                                totalYearlyKilos += (w * r * mult);
+                            });
+                        }
+                    }
+                }
+            }
+
+            let yearlyTimeLabel;
+            if (totalYearlySeconds === 0) {
+                yearlyTimeLabel = '0m';
+            } else if (totalYearlySeconds < 3600) {
+                const m = Math.floor(totalYearlySeconds / 60);
+                yearlyTimeLabel = m > 0 ? m + 'm' : Math.round(totalYearlySeconds) + 's';
+            } else {
+                const h = Math.floor(totalYearlySeconds / 3600);
+                const m = Math.floor((totalYearlySeconds % 3600) / 60);
+                yearlyTimeLabel = m > 0 ? h + 'h' + m + 'm' : h + 'h';
+            }
+            const yearlyTonnes = (totalYearlyKilos / 1000).toFixed(1); 
+
+            document.getElementById('yearly-hours-val').innerText = yearlyTimeLabel;
+            document.getElementById('yearly-tonnage-val').innerText = `${yearlyTonnes}t`;
+
+            const containerTime = document.getElementById('performance-time-content');
+            containerTime.innerHTML = '<h3>Temps d\'entraînement</h3>';
+            
+            let filterBarHTML = `
+                <div class="time-filter-bar">
+                    <button class="btn-filter-time ${performanceTimeFilter === 'jours' ? 'active' : ''}" onclick="filterPerformanceTime('jours')">Jours</button>
+                    <button class="btn-filter-time ${performanceTimeFilter === 'semaines' ? 'active' : ''}" onclick="filterPerformanceTime('semaines')">Semaines</button>
+                    <button class="btn-filter-time ${performanceTimeFilter === 'mois' ? 'active' : ''}" onclick="filterPerformanceTime('mois')">Mois</button>
+                    <button class="btn-filter-time ${performanceTimeFilter === 'annees' ? 'active' : ''}" onclick="filterPerformanceTime('annees')">Années</button>
+                </div>
+            `;
+            containerTime.innerHTML += filterBarHTML;
+
+            const card = document.createElement('div');
+            card.className = 'habit-card';
+            let barsHTML = '<div class="graph-bars" style="height:110px; display:flex; align-items:flex-end; justify-content:space-around; margin-bottom:8px;">';
+            let labelsHTML = '<div class="graph-labels" style="display:flex; justify-content:space-around;">';
+
+            let trackingData = [];
+            const now = new Date();
+
+            if (performanceTimeFilter === 'jours') {
+                const last5Days = getLast30DaysDates().slice(0, 5).reverse();
+                last5Days.forEach(dateStr => {
+                    const dayData = appData.workoutHistory[dateStr];
+                    const seconds = dayData ? (dayData.totalSessionTime || 0) : 0;
+                    trackingData.push({ label: dateStr.split('-')[2] + '/' + dateStr.split('-')[1], secs: seconds });
+                });
+            } 
+            else if (performanceTimeFilter === 'semaines') {
+                for (let i = 3; i >= 0; i--) {
+                    let totalSecs = 0;
+                    let labelStr = "";
+                    for (let d = 0; d < 7; d++) {
+                        const targetDate = new Date();
+                        targetDate.setDate(now.getDate() - (i * 7 + d));
+                        const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+                        if(appData.workoutHistory[dateStr]) totalSecs += (appData.workoutHistory[dateStr].totalSessionTime || 0);
+                        if(d === 6) labelStr = "S-" + i;
+                    }
+                    trackingData.push({ label: labelStr, secs: totalSecs });
+                }
+            }
+            else if (performanceTimeFilter === 'mois') {
+                for (let i = 4; i >= 0; i--) {
+                    const targetMonth = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    let totalSecs = 0;
+                    const mKey = `${targetMonth.getFullYear()}-${String(targetMonth.getMonth() + 1).padStart(2, '0')}`;
+                    for (const dateKey in appData.workoutHistory) {
+                        if (dateKey.startsWith(mKey)) {
+                            totalSecs += (appData.workoutHistory[dateKey].totalSessionTime || 0);
+                        }
+                    }
+                    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jui', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+                    trackingData.push({ label: monthNames[targetMonth.getMonth()], secs: totalSecs });
+                }
+            }
+            else if (performanceTimeFilter === 'annees') {
+                for (let i = 1; i >= 0; i--) {
+                    const targetYear = now.getFullYear() - i;
+                    let totalSecs = 0;
+                    for (const dateKey in appData.workoutHistory) {
+                        if (dateKey.startsWith(`${targetYear}-`)) {
+                            totalSecs += (appData.workoutHistory[dateKey].totalSessionTime || 0);
+                        }
+                    }
+                    trackingData.push({ label: String(targetYear), secs: totalSecs });
+                }
+            }
+
+            const maxSecs = Math.max(...trackingData.map(t => t.secs), 1);
+            trackingData.forEach(t => {
+                const pxHeight = (t.secs / maxSecs) * 100;
+                let timeLabel;
+                if (t.secs === 0) {
+                    timeLabel = '0m';
+                } else if (t.secs < 3600) {
+                    const m = Math.floor(t.secs / 60);
+                    timeLabel = m > 0 ? m + 'm' : Math.round(t.secs) + 's';
+                } else {
+                    const h = Math.floor(t.secs / 3600);
+                    const m = Math.floor((t.secs % 3600) / 60);
+                    timeLabel = m > 0 ? h + 'h' + m + 'm' : h + 'h';
+                }
+                barsHTML += `
+                    <div class="graph-bar-wrapper">
+                        <span style="font-size:0.65rem; margin-bottom:2px; color:var(--text-muted); font-weight:700;">${timeLabel}</span>
+                        <div class="graph-bar-fill" style="height: ${Math.max(5, pxHeight)}px; width:24px;"></div>
+                    </div>
+                `;
+                labelsHTML += `<div style="flex:1; font-weight:700;">${t.label}</div>`;
+            });
+
+            barsHTML += '</div>';
+            labelsHTML += '</div>';
+            card.innerHTML = barsHTML + labelsHTML;
+            containerTime.appendChild(card);
+
+            const containerPR = document.getElementById('performance-pr-content');
+            containerPR.innerHTML = '<h3>Mes Records Personnels (PR)</h3>';
+            
+            if(appData.exercises.length === 0) {
+                containerPR.innerHTML += `<p style="color:var(--text-muted); text-align:center; padding:10px;">Créez des exercices pour suivre vos records.</p>`;
+                return;
+            }
+
+            appData.exercises.forEach((ex, index) => {
+                const prs = getPRsForExercise(ex.id);
+                const isPdc = ex.type === 'pdc';
+                const isTempsSec = ex.type === 'temps_sec' || ex.type === 'temps';
+                const isTempsMin = ex.type === 'temps_min';
+                const isTemps = isTempsSec || isTempsMin;
+
+                let heavyDisplay = '-';
+                let mediumDisplay = '-';
+                let lightDisplay = '-';
+
+                if (isTemps) {
+                    heavyDisplay = prs.heavy.reps > 0 ? formatExTime(prs.heavy.reps, isTempsMin) : '-';
+                } else if (isPdc) {
+                    heavyDisplay = prs.heavy.reps > 0 ? prs.heavy.reps + ' réps' : '-';
+                } else {
+                    heavyDisplay = prs.heavy.weight > 0 ? prs.heavy.weight + ' kg<span style=\"font-size:0.75rem;color:var(--text-muted);font-weight:normal;\">x' + prs.heavy.reps + '</span>' : '-';
+                    mediumDisplay = prs.medium.weight > 0 ? prs.medium.weight + ' kg<span style=\"font-size:0.75rem;color:var(--text-muted);font-weight:normal;\">x' + prs.medium.reps + '</span>' : '-';
+                    lightDisplay = prs.light.weight > 0 ? prs.light.weight + ' kg<span style=\"font-size:0.75rem;color:var(--text-muted);font-weight:normal;\">x' + prs.light.reps + '</span>' : '-';
+                }
+
+                const canMoveUp = index > 0;
+                const canMoveDown = index < appData.exercises.length - 1;
+
+                const row = document.createElement('div');
+                row.className = 'exercise-card';
+
+                let prsHTML = '';
+                if (isPdc || isTemps) {
+                    prsHTML = `
+                        <div class="exercise-prs">
+                            <div class="pr-badge">
+                                <span class="icon">🏆</span>
+                                <span class="weight" style="background: var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">${heavyDisplay}</span>
+                                <span class="type">Record</span>
+                            </div>
+                        </div>`;
+                } else {
+                    prsHTML = `
+                        <div class="exercise-prs">
+                            <div class="pr-badge">
+                                <span class="icon">🏆</span>
+                                <span class="weight" style="background: var(--gradient-gold); -webkit-background-clip:text; -webkit-text-fill-color:transparent;">${heavyDisplay}</span>
+                                <span class="type">Lourd</span>
+                            </div>
+                            <div class="pr-badge">
+                                <span class="icon">🥈</span>
+                                <span class="weight" style="color:#c0c0c0;">${mediumDisplay}</span>
+                                <span class="type">Moyen</span>
+                            </div>
+                            <div class="pr-badge">
+                                <span class="icon">🥉</span>
+                                <span class="weight" style="color:#cd7f32;">${lightDisplay}</span>
+                                <span class="type">Léger</span>
+                            </div>
+                        </div>`;
+                }
+
+                row.innerHTML = `
+                    <div class="exercise-header">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <div style="display:flex; flex-direction:column; align-items:center;">
+                                <button style="background:none; border:none; padding:2px; color:${canMoveUp ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canMoveUp ? 'pointer' : 'default'}; font-size:1.1rem; line-height:0.8;" onclick="${canMoveUp ? `moveExerciseGlobal(${index}, -1)` : ''}">▲</button>
+                                <button style="background:none; border:none; padding:2px; color:${canMoveDown ? '#00f0ff' : 'rgba(255,255,255,0.1)'}; cursor:${canMoveDown ? 'pointer' : 'default'}; font-size:1.1rem; line-height:0.8;" onclick="${canMoveDown ? `moveExerciseGlobal(${index}, 1)` : ''}">▼</button>
+                            </div>
+                            <span class="exercise-title">${ex.name}</span>
+                        </div>
+                    </div>
+                    ${prsHTML}
+                `;
+                containerPR.appendChild(row);
+            });
+        }
+
+        // --- SECTION NUTRITION ---
+        function setNutriFilter(type, filter) {
+            if (type === 'kcal') {
+                nutritionKcalFilter = filter;
+                const btns = ['jours', 'semaines', 'mois', 'annees'];
+                btns.forEach(b => document.getElementById(`btn-kcal-${b}`).classList.toggle('active', b === filter));
+            } else {
+                nutritionWeightFilter = filter;
+                const btns = ['jours', 'semaines', 'mois', 'annees'];
+                btns.forEach(b => document.getElementById(`btn-weight-${b}`).classList.toggle('active', b === filter));
+            }
+            renderNutritionCharts();
+        }
+
+        function saveTodayWeight() {
+            const input = document.getElementById('today-weight-input');
+            const val = parseFloat(input.value);
+            if (!val || val <= 0) return;
+            const today = getTodayStr();
+            if (!appData.nutritionHistory[today]) appData.nutritionHistory[today] = { entries: [], weight: 0 };
+            appData.nutritionHistory[today].weight = val;
+            saveToStorage();
+            renderNutritionCharts();
+            alert("⚖️ Poids enregistré avec succès.");
+        }
+
+        function addFoodItem() {
+            const nameIn = document.getElementById('new-food-name');
+            const kcalIn = document.getElementById('new-food-kcal');
+            const protIn = document.getElementById('new-food-protein');
+            
+            const carbIn = document.getElementById('new-food-carb');
+            const name = nameIn.value.trim();
+            const kcal = parseFloat(kcalIn.value) || 0;
+            const prot = parseFloat(protIn.value) || 0;
+            const carb = parseFloat(carbIn ? carbIn.value : 0) || 0;
+            
+            if(!name) return;
+            appData.foods.push({ id: 'f_' + Date.now(), name, kcal, protein: prot, carb: carb });
+            saveToStorage();
+            
+            nameIn.value = ''; kcalIn.value = ''; protIn.value = ''; if(carbIn) carbIn.value = '';
+            renderNutrition();
+        }
+
+        function deleteFoodItem(id) {
+            if(confirm("Supprimer cet aliment de la liste ?")) {
+                appData.foods = appData.foods.filter(f => f.id !== id);
+                saveToStorage();
+                renderNutrition();
+            }
+        }
+
+        function renderFoodDropdownList() {
+            const search = document.getElementById('food-search-input').value.toLowerCase().trim();
+            const container = document.getElementById('food-dropdown-list');
+            container.innerHTML = '';
+            
+            const filtered = appData.foods.filter(f => f.name.toLowerCase().includes(search));
+            if (filtered.length === 0) {
+                container.style.display = 'none';
+                return;
+            }
+            
+            container.style.display = 'block';
+            filtered.forEach(f => {
+                const div = document.createElement('div');
+                div.className = 'food-dropdown-item';
+                div.style.padding = '12px';
+                div.style.cursor = 'pointer';
+                div.style.borderBottom = '1px solid var(--border-color)';
+                div.style.fontSize = '0.9rem';
+                div.innerHTML = `<strong>${f.name}</strong> <span style="color:var(--text-muted); font-size:0.75rem; margin-left:5px;">(${f.kcal} kcal / ${f.protein}g prot)</span>`;
+                div.onclick = () => {
+                    document.getElementById('food-search-input').value = f.name;
+                    document.getElementById('food-select-hidden').value = f.id;
+                    container.style.display = 'none';
+                };
+                container.appendChild(div);
+            });
+        }
+
+        document.addEventListener('click', (e) => {
+            if (e.target.id !== 'food-search-input') {
+                const container = document.getElementById('food-dropdown-list');
+                if (container) container.style.display = 'none';
+            }
+        });
+
+        function addFoodEntry() {
+            const foodId = document.getElementById('food-select-hidden').value;
+            const amount = parseFloat(document.getElementById('food-amount').value) || 0;
+            if (!foodId || amount <= 0) {
+                alert("Veuillez sélectionner un aliment dans la liste et entrer un poids valide.");
+                return;
+            }
+            const food = appData.foods.find(f => f.id === foodId);
+            if (!food) return;
+            
+            const today = getTodayStr();
+            if (!appData.nutritionHistory[today]) appData.nutritionHistory[today] = { entries: [], weight: 0 };
+            
+            appData.nutritionHistory[today].entries.push({
+                id: 'fe_' + Date.now(),
+                name: food.name,
+                kcal: Math.round((food.kcal * amount) / 100),
+                protein: parseFloat(((food.protein * amount) / 100).toFixed(1)),
+                carb: parseFloat((((food.carb || 0) * amount) / 100).toFixed(1)),
+                amount: amount
+            });
+            
+            saveToStorage();
+            document.getElementById('food-search-input').value = '';
+            document.getElementById('food-select-hidden').value = '';
+            document.getElementById('food-amount').value = '';
+            
+            renderNutrition();
+        }
+
+        function deleteFoodEntry(id) {
+            const today = getTodayStr();
+            if (appData.nutritionHistory[today]) {
+                appData.nutritionHistory[today].entries = appData.nutritionHistory[today].entries.filter(e => e.id !== id);
+                saveToStorage();
+                renderNutrition();
+            }
+        }
+
+        function renderNutrition() {
+            const today = getTodayStr();
+            const currentData = appData.nutritionHistory[today] || { entries: [], weight: 0 };
+            
+            if (currentData.weight > 0) {
+                document.getElementById('today-weight-input').value = currentData.weight;
+            } else {
+                document.getElementById('today-weight-input').value = '';
+            }
+
+            let totalKcal = 0;
+            let totalProt = 0;
+            let totalCarb = 0;
+            currentData.entries.forEach(e => { totalKcal += e.kcal; totalProt += (e.protein || 0); totalCarb += (e.carb || 0); });
+            totalProt = parseFloat(totalProt.toFixed(1));
+
+            const targetKcal = appData.dailyKcalTarget || 2500;
+            const targetProt = appData.dailyProtTarget || 150;
+
+            const kcalPercent = Math.min(100, Math.round((totalKcal / targetKcal) * 100));
+            const isKcalOver = totalKcal > targetKcal ? 'over' : '';
+
+            document.getElementById('kcal-summary').innerHTML = `
+                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Calories</span>
+                <div style="font-size:1.6rem; font-weight:900; margin-top:4px;">${totalKcal} / <span style="color:var(--text-muted); font-size:1.1rem;">${targetKcal} kcal</span></div>
+                <div class="kcal-progress"><div class="kcal-progress-fill ${isKcalOver}" style="width:${kcalPercent}%;"></div></div>
+            `;
+
+            const protPercent = Math.min(100, Math.round((totalProt / targetProt) * 100));
+            document.getElementById('prot-summary').innerHTML = `
+                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Protéines</span>
+                <div style="font-size:1.6rem; font-weight:900; margin-top:4px;">${totalProt.toFixed(1)} / <span style="color:var(--text-muted); font-size:1.1rem;">${targetProt}g</span></div>
+                <div class="kcal-progress"><div class="kcal-progress-fill" style="width:${protPercent}%; background:#00f0ff;"></div></div>
+            `;
+            const targetCarb = appData.dailyCarbTarget || 250;
+            const carbPercent = Math.min(100, Math.round((totalCarb / targetCarb) * 100));
+            const carbSummaryEl = document.getElementById('carb-summary');
+            if (carbSummaryEl) {
+                carbSummaryEl.innerHTML = `
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase;">Glucides</span>
+                    <div style="font-size:1.6rem; font-weight:900; margin-top:4px;">${totalCarb.toFixed(1)} / <span style="color:var(--text-muted); font-size:1.1rem;">${targetCarb}g</span></div>
+                    <div class="kcal-progress"><div class="kcal-progress-fill" style="width:${carbPercent}%; background:linear-gradient(90deg,#ff8c00,#ffd700);"></div></div>
+                `;
+            }
+
+            const entriesContainer = document.getElementById('today-food-entries');
+            entriesContainer.innerHTML = '';
+            if (currentData.entries.length === 0) {
+                entriesContainer.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:10px; font-size:0.85rem;">Aucun aliment enregistré aujourd'hui.</p>`;
+            } else {
+                currentData.entries.forEach(e => {
+                    entriesContainer.innerHTML += `
+                        <div class="food-entry">
+                            <div class="food-info">
+                                <span class="food-name">${e.name}</span>
+                                <span class="food-details">${e.amount}g • ${e.kcal} kcal • ${e.protein}g prot${e.carb ? ' • ' + e.carb + 'g carb' : ''}</span>
+                            </div>
+                            <button class="btn-delete" onclick="deleteFoodEntry('${e.id}')">✕</button>
+                        </div>
+                    `;
+                });
+            }
+
+            const settingsList = document.getElementById('food-settings-list');
+            settingsList.innerHTML = '';
+            if (appData.foods.length === 0) {
+                settingsList.innerHTML = `<p style="color:var(--text-muted); text-align:center; padding:10px; font-size:0.85rem;">Aucun aliment créé dans votre base.</p>`;
+            } else {
+                const sortedFoods = [...appData.foods].sort((a,b) => a.name.localeCompare(b.name));
+                sortedFoods.forEach(f => {
+                    settingsList.innerHTML += `
+                        <div class="settings-list-item">
+                            <div style="font-weight:600; font-size:0.95rem;">${f.name} <span style="color:var(--text-muted); font-weight:normal; font-size:0.75rem; margin-left:5px;">(${f.kcal} kcal / ${f.protein}g prot${f.carb ? ' / ' + f.carb + 'g carb' : ''})</span></div>
+                            <button class="btn-delete" onclick="deleteFoodItem('${f.id}')">Supprimer</button>
+                        </div>
+                    `;
+                });
+            }
+
+            renderNutritionCharts();
+        }
+
+        function renderNutritionCharts() {
+            const now = new Date();
+            const targetKcal = appData.dailyKcalTarget || 2500;
+
+            // Chart Calories
+            const kcalContainer = document.getElementById('kcal-chart-container');
+            kcalContainer.innerHTML = '';
+            let kcalData = [];
+
+            if (nutritionKcalFilter === 'jours') {
+                const last5Days = getLast30DaysDates().slice(0, 5).reverse();
+                last5Days.forEach(dateStr => {
+                    let total = 0;
+                    if(appData.nutritionHistory[dateStr]) appData.nutritionHistory[dateStr].entries.forEach(e => total += e.kcal);
+                    kcalData.push({ label: dateStr.split('-')[2], val: total });
+                });
+            } 
+            else if (nutritionKcalFilter === 'semaines') {
+                for (let i = 3; i >= 0; i--) {
+                    let total = 0;
+                    let count = 0;
+                    for (let d = 0; d < 7; d++) {
+                        const targetDate = new Date();
+                        targetDate.setDate(now.getDate() - (i * 7 + d));
+                        const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+                        if(appData.nutritionHistory[dateStr] && appData.nutritionHistory[dateStr].entries.length > 0) {
+                            appData.nutritionHistory[dateStr].entries.forEach(e => total += e.kcal);
+                        }
+                    }
+                    kcalData.push({ label: 'S-' + i, val: total > 0 ? Math.round(total / 7) : 0 });
+                }
+            }
+            else if (nutritionKcalFilter === 'mois') {
+                for (let i = 4; i >= 0; i--) {
+                    const targetMonth = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    let total = 0;
+                    let daysWithData = 0;
+                    const mKey = `${targetMonth.getFullYear()}-${String(targetMonth.getMonth() + 1).padStart(2, '0')}`;
+                    for (const dateKey in appData.nutritionHistory) {
+                        if (dateKey.startsWith(mKey)) {
+                            let daySum = 0;
+                            appData.nutritionHistory[dateKey].entries.forEach(e => daySum += e.kcal);
+                            if(daySum > 0) { total += daySum; daysWithData++; }
+                        }
+                    }
+                    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jui', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+                    kcalData.push({ label: monthNames[targetMonth.getMonth()], val: daysWithData > 0 ? Math.round(total / daysWithData) : 0 });
+                }
+            }
+            else if (nutritionKcalFilter === 'annees') {
+                for (let i = 1; i >= 0; i--) {
+                    const targetYear = now.getFullYear() - i;
+                    let total = 0;
+                    let daysWithData = 0;
+                    for (const dateKey in appData.nutritionHistory) {
+                        if (dateKey.startsWith(`${targetYear}-`)) {
+                            let daySum = 0;
+                            appData.nutritionHistory[dateKey].entries.forEach(e => daySum += e.kcal);
+                            if(daySum > 0) { total += daySum; daysWithData++; }
+                        }
+                    }
+                    kcalData.push({ label: String(targetYear), val: daysWithData > 0 ? Math.round(total / daysWithData) : 0 });
+                }
+            }
+
+            let kcalBarsHTML = '<div class="graph-bars" style="height:90px; display:flex; align-items:flex-end; justify-content:space-around; margin-bottom:8px;">';
+            let kcalLabelsHTML = '<div class="graph-labels" style="display:flex; justify-content:space-around;">';
+            const maxKcal = Math.max(...kcalData.map(k => k.val), targetKcal, 1);
+
+            kcalData.forEach(k => {
+                const pxHeight = (k.val / maxKcal) * 70;
+                const fillColor = k.val > targetKcal ? 'var(--danger-color)' : 'var(--success-color)';
+                kcalBarsHTML += `
+                    <div class="graph-bar-wrapper">
+                        <span style="font-size:0.6rem; margin-bottom:2px; color:var(--text-muted); font-weight:700;">${k.val}</span>
+                        <div class="graph-bar-fill" style="height:${Math.max(5, pxHeight)}px; width:20px; background:${fillColor}; box-shadow:none;"></div>
+                    </div>
+                `;
+                kcalLabelsHTML += `<div style="flex:1; font-weight:700;">${k.label}</div>`;
+            });
+            kcalBarsHTML += '</div>'; kcalLabelsHTML += '</div>';
+            kcalContainer.innerHTML = kcalBarsHTML + kcalLabelsHTML;
+
+
+            // Chart Poids
+            const weightContainer = document.getElementById('weight-chart-container');
+            weightContainer.innerHTML = '';
+            let weightData = [];
+
+            if (nutritionWeightFilter === 'jours') {
+                const last5Days = getLast30DaysDates().slice(0, 5).reverse();
+                last5Days.forEach(dateStr => {
+                    let w = appData.nutritionHistory[dateStr] ? appData.nutritionHistory[dateStr].weight : 0;
+                    weightData.push({ label: dateStr.split('-')[2], val: w });
+                });
+            }
+            else if (nutritionWeightFilter === 'semaines') {
+                for (let i = 3; i >= 0; i--) {
+                    let sum = 0;
+                    let count = 0;
+                    for (let d = 0; d < 7; d++) {
+                        const targetDate = new Date();
+                        targetDate.setDate(now.getDate() - (i * 7 + d));
+                        const dateStr = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+                        if(appData.nutritionHistory[dateStr] && appData.nutritionHistory[dateStr].weight > 0) {
+                            sum += appData.nutritionHistory[dateStr].weight;
+                            count++;
+                        }
+                    }
+                    weightData.push({ label: 'S-' + i, val: count > 0 ? parseFloat((sum / count).toFixed(1)) : 0 });
+                }
+            }
+            else if (nutritionWeightFilter === 'mois') {
+                for (let i = 4; i >= 0; i--) {
+                    const targetMonth = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                    let sum = 0;
+                    let count = 0;
+                    const mKey = `${targetMonth.getFullYear()}-${String(targetMonth.getMonth() + 1).padStart(2, '0')}`;
+                    for (const dateKey in appData.nutritionHistory) {
+                        if (dateKey.startsWith(mKey) && appData.nutritionHistory[dateKey].weight > 0) {
+                            sum += appData.nutritionHistory[dateKey].weight;
+                            count++;
+                        }
+                    }
+                    const monthNames = ['Jan', 'Fév', 'Mar', 'Avr', 'Mai', 'Jui', 'Jui', 'Aoû', 'Sep', 'Oct', 'Nov', 'Déc'];
+                    weightData.push({ label: monthNames[targetMonth.getMonth()], val: count > 0 ? parseFloat((sum / count).toFixed(1)) : 0 });
+                }
+            }
+            else if (nutritionWeightFilter === 'annees') {
+                for (let i = 1; i >= 0; i--) {
+                    const targetYear = now.getFullYear() - i;
+                    let sum = 0;
+                    let count = 0;
+                    for (const dateKey in appData.nutritionHistory) {
+                        if (dateKey.startsWith(`${targetYear}-`) && appData.nutritionHistory[dateKey].weight > 0) {
+                            sum += appData.nutritionHistory[dateKey].weight;
+                            count++;
+                        }
+                    }
+                    weightData.push({ label: String(targetYear), val: count > 0 ? parseFloat((sum / count).toFixed(1)) : 0 });
+                }
+            }
+
+            let wBarsHTML = '<div class="graph-bars" style="height:90px; display:flex; align-items:flex-end; justify-content:space-around; margin-bottom:8px;">';
+            let wLabelsHTML = '<div class="graph-labels" style="display:flex; justify-content:space-around;">';
+            const validWeights = weightData.map(w => w.val).filter(v => v > 0);
+            const minW = validWeights.length > 0 ? Math.min(...validWeights) - 2 : 50;
+            const maxW = validWeights.length > 0 ? Math.max(...validWeights) + 2 : 100;
+
+            weightData.forEach(w => {
+                let pxHeight = 5;
+                if(w.val > 0) {
+                    pxHeight = ((w.val - minW) / (maxW - minW)) * 70;
+                }
+                wBarsHTML += `
+                    <div class="graph-bar-wrapper">
+                        <span style="font-size:0.6rem; margin-bottom:2px; color:var(--text-muted); font-weight:700;">${w.val > 0 ? w.val + 'kg' : '-'}</span>
+                        <div class="graph-bar-fill" style="height:${Math.max(5, pxHeight)}px; width:20px; background:var(--gradient-secondary); box-shadow:none;"></div>
+                    </div>
+                `;
+                wLabelsHTML += `<div style="flex:1; font-weight:700;">${w.label}</div>`;
+            });
+            wBarsHTML += '</div>'; wLabelsHTML += '</div>';
+            weightContainer.innerHTML = wBarsHTML + wLabelsHTML;
+        }
+
+        // --- SECTION PARAMÈTRES / CONFIGURATION ---
+        function updateDailyKcal(val) {
+            const v = parseInt(val) || 2500;
+            appData.dailyKcalTarget = v; saveToStorage();
+        }
+        function updateDailyProt(val) {
+            const v = parseInt(val) || 150;
+            appData.dailyProtTarget = v; saveToStorage();
+        }
+        function updateDailyCarb(val) {
+            const v = parseInt(val) || 250;
+            appData.dailyCarbTarget = v; saveToStorage();
+        }
+
+        function createRoutine() {
+            const input = document.getElementById('new-routine-name');
+            const name = input.value.trim();
+            if(!name) return;
+            const newId = 'r_' + Date.now();
+            appData.routines.push({ id: newId, name: name, exercises: [] });
+            saveToStorage();
+            input.value = '';
+            renderParametres();
+            renderSport();
+        }
+
+        function deleteRoutine(id) {
+            if(confirm("Supprimer cette séance ? (Les exercices ne seront pas supprimés de votre base globale)")) {
+                appData.routines = appData.routines.filter(r => r.id !== id);
+                saveToStorage();
+                currentRoutineFilter = "all";
+                renderParametres();
+                renderSport();
+            }
+        }
+
+
+        function toggleAddExerciseDropdown(routId) {
+            const dropdown = document.getElementById('add-ex-dropdown-' + routId);
+            dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addExerciseToRoutine(routId, exId) {
+            const rout = appData.routines.find(r => r.id === routId);
+            if (rout && !rout.exercises.includes(exId)) {
+                rout.exercises.push(exId);
+                saveToStorage();
+                renderParametres();
+            }
+        }
+
+        function removeExerciseFromRoutine(routId, exId) {
+            const rout = appData.routines.find(r => r.id === routId);
+            if (rout) {
+                rout.exercises = rout.exercises.filter(e => e !== exId);
+                saveToStorage();
+                renderParametres();
+            }
+        }
+
+        function toggleExerciseInRoutine(routId, exId, isChecked) {
+            const rout = appData.routines.find(r => r.id === routId);
+            if(!rout) return;
+            if(isChecked) {
+                if(!rout.exercises.includes(exId)) rout.exercises.push(exId);
+            } else {
+                rout.exercises = rout.exercises.filter(id => id !== exId);
+            }
+            saveToStorage();
+            if (currentRoutineFilter === routId || currentRoutineFilter === "all") renderSport();
+        }
+
+        function addHabit() {
+            const input = document.getElementById('new-habit-name');
+            const name = input.value.trim();
+            if(!name) return;
+            const newHabit = { id: 'h_' + Date.now(), name: name };
+            appData.habits.push(newHabit);
+            appData.habitOrder.push({ type: 'daily', id: newHabit.id });
+            saveToStorage();
+            input.value = '';
+            renderParametres();
+            calculateGlobalStats();
+            renderAccueil();
+        }
+
+        function deleteHabit(id) {
+            if(confirm("Supprimer cet objectif quotidien et tout son historique ?")) {
+                appData.habits = appData.habits.filter(h => h.id !== id);
+                appData.habitOrder = appData.habitOrder.filter(o => o.id !== id);
+                for (let date in appData.history) { delete appData.history[date][id]; }
+                saveToStorage();
+                renderParametres();
+                calculateGlobalStats();
+                renderAccueil();
+            }
+        }
+
+        function addWeeklyHabit() {
+            const input = document.getElementById('new-weekly-habit-name');
+            const name = input.value.trim();
+            if(!name) return;
+            appData.weeklyHabits.push({ id: 'wh_' + Date.now(), name: name });
+            saveToStorage();
+            input.value = '';
+            renderParametres();
+            calculateGlobalStats();
+            renderAccueil();
+        }
+
+        function deleteWeeklyHabit(id) {
+            if(confirm("Supprimer cet objectif de semaine et tout son historique ?")) {
+                appData.weeklyHabits = appData.weeklyHabits.filter(wh => wh.id !== id);
+                appData.habitOrder = appData.habitOrder.filter(o => o.id !== id);
+                for (let week in appData.weeklyHistory) { delete appData.weeklyHistory[week][id]; }
+                saveToStorage();
+                renderParametres();
+                calculateGlobalStats();
+                renderAccueil();
+            }
+        }
+
+        function updateDefaultSetsCount() {
+            const input = document.getElementById('default-sets-input');
+            const val = parseInt(input.value) || 5;
+            appData.defaultSetsCount = val;
+            saveToStorage();
+            alert("⚙️ Le nombre de séries par défaut a été configuré sur " + val + ".");
+        }
+
+        function addTimerPreset() {
+            const m = parseInt(document.getElementById('preset-min').value) || 0;
+            const s = parseInt(document.getElementById('preset-sec').value) || 0;
+            const totalSecs = (m * 60) + s;
+            if (totalSecs <= 0) return;
+            if (!appData.timerPresets.includes(totalSecs)) {
+                appData.timerPresets.push(totalSecs);
+                saveToStorage();
+                renderParametres();
+                renderTimerPresets();
+            }
+        }
+
+        function deleteTimerPreset(sec) {
+            if(appData.timerPresets.length <= 1) { alert("Vous devez garder au moins un preset."); return; }
+            appData.timerPresets = appData.timerPresets.filter(p => p !== sec);
+            if(appData.defaultTimer === sec) appData.defaultTimer = appData.timerPresets[0];
+            saveToStorage();
+            renderParametres();
+            renderTimerPresets();
+        }
+
+        function setDefaultTimer(sec) {
+            appData.defaultTimer = sec;
+            saveToStorage();
+            renderParametres();
+            renderTimerPresets();
+        }
+
+        function toggleSettingsSection(id, arrowId) {
+            const content = document.getElementById(id);
+            const arrow = document.getElementById(arrowId);
+            if(content.style.display === 'none') {
+                content.style.display = 'block';
+                if(arrow) arrow.style.transform = 'rotate(180deg)';
+            } else {
+                content.style.display = 'none';
+                if(arrow) arrow.style.transform = 'rotate(0deg)';
+            }
+        }
+
+        function renderParametres() {
+            document.getElementById('settings-daily-kcal').value = appData.dailyKcalTarget || 2500;
+            document.getElementById('settings-daily-prot').value = appData.dailyProtTarget || 150;
+            const carbTargetEl = document.getElementById('settings-daily-carb');
+            if (carbTargetEl) carbTargetEl.value = appData.dailyCarbTarget || 250;
+            document.getElementById('default-sets-input').value = appData.defaultSetsCount || 5;
+
+            // Liste Exercices Globale
+            const exList = document.getElementById('exercises-settings-list');
+            exList.innerHTML = '';
+            appData.exercises.forEach(ex => {
+                exList.innerHTML += `
+                    <div class="settings-list-item" style="flex-direction:column; align-items:stretch; gap:10px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="font-size:1rem;">${ex.name}</strong>
+                            <button class="btn-delete" onclick="deleteExercise('${ex.id}')">Supprimer l'exercice</button>
+                        </div>
+                        <div style="margin-top:4px;">
+                            <select class="input-dark" style="width:100%; padding:10px; font-size:0.85rem; border-radius:10px; cursor:pointer;" onchange="setExerciseType('${ex.id}', this.value)">
+                                <option value="pdc" ${ex.type === 'pdc' || !ex.type ? 'selected' : ''}>💪 Poids du corps / Réps simples</option>
+                                <option value="leste" ${ex.type === 'leste' ? 'selected' : ''}>🏋️ Lest / Charge unique (Barre, poulie...)</option>
+                                <option value="haltere" ${ex.type === 'haltere' ? 'selected' : ''}>🔱 Haltères (×2 automatisé)</option>
+                                <option value="temps_sec" ${ex.type === 'temps_sec' ? 'selected' : ''}>⏱️ Chrono (Secondes)</option>
+                                <option value="temps_min" ${ex.type === 'temps_min' ? 'selected' : ''}>⏱️ Chrono (Minutes décimales)</option>
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Liste Programmes / Routines
+            const routinesList = document.getElementById('routines-settings-list');
+            routinesList.innerHTML = '';
+            appData.routines.forEach(rout => {
+                // Exercices déjà dans la séance
+                let exercicesHTML = '<div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;">';
+                exercicesHTML += '<span style="font-size:0.75rem; color:var(--text-muted); font-weight:700; text-transform:uppercase; display:block; margin-bottom:8px;">Exercices inclus :</span>';
+                
+                if (rout.exercises.length === 0) {
+                    exercicesHTML += '<p style="font-size:0.85rem; color:var(--text-muted); font-style:italic;">Aucun exercice dans cette séance.</p>';
+                } else {
+                    rout.exercises.forEach(exId => {
+                        const ex = appData.exercises.find(e => e.id === exId);
+                        if (ex) {
+                            exercicesHTML += `
+                                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px solid rgba(255,255,255,0.03);">
+                                    <span style="font-size:0.9rem;">${ex.name}</span>
+                                    <button class="btn-delete" style="padding:3px 8px; font-size:0.75rem;" onclick="removeExerciseFromRoutine('${rout.id}', '${exId}')">✕</button>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+                exercicesHTML += '</div>';
+
+                // Dropdown pour ajouter un exercice
+                const availableExercises = appData.exercises.filter(ex => !rout.exercises.includes(ex.id));
+                let dropdownHTML = '';
+                if (availableExercises.length > 0) {
+                    dropdownHTML = `
+                        <div style="margin-top:10px;">
+                            <button class="btn-action" style="width:100%; font-size:0.85rem; padding:8px; background:rgba(0,240,255,0.1); border:1px solid rgba(0,240,255,0.3); color:#00f0ff;" onclick="toggleAddExerciseDropdown('${rout.id}')">
+                                + Ajouter un exercice
+                            </button>
+                            <div id="add-ex-dropdown-${rout.id}" style="display:none; margin-top:6px; background:var(--card-bg); border:1px solid var(--border-color); border-radius:10px; overflow:hidden; max-height:200px; overflow-y:auto;">
+                                ${availableExercises.map(ex => `
+                                    <div style="padding:10px 14px; cursor:pointer; font-size:0.9rem; border-bottom:1px solid rgba(255,255,255,0.03);" 
+                                         onclick="addExerciseToRoutine('${rout.id}', '${ex.id}')"
+                                         onmouseover="this.style.background='rgba(0,240,255,0.08)'"
+                                         onmouseout="this.style.background='transparent'">
+                                        ${ex.name}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                }
+
+                routinesList.innerHTML += `
+                    <div class="settings-list-item" style="flex-direction:column; align-items:stretch;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <strong style="font-size:1.05rem; color:#00f0ff;">🎯 ${rout.name}</strong>
+                            <button class="btn-delete" onclick="deleteRoutine('${rout.id}')">Supprimer la séance</button>
+                        </div>
+                        ${exercicesHTML}
+                        ${dropdownHTML}
+                    </div>
+                `;
+            });
+
+            // Objectifs Quotidiens
+            const habitsSettings = document.getElementById('settings-list');
+            habitsSettings.innerHTML = '';
+            appData.habits.forEach(h => {
+                habitsSettings.innerHTML += `
+                    <div class="settings-list-item">
+                        <span>${h.name}</span>
+                        <button class="btn-delete" onclick="deleteHabit('${h.id}')">Supprimer</button>
+                    </div>
+                `;
+            });
+
+            // Objectifs Semaine
+            const weeklySettings = document.getElementById('weekly-settings-list');
+            weeklySettings.innerHTML = '';
+            appData.weeklyHabits.forEach(wh => {
+                const freq = wh.freq || 7;
+                let freqOptions = '';
+                for (let i = 1; i <= 7; i++) {
+                    freqOptions += `<option value="${i}" ${freq === i ? 'selected' : ''}>${i}x / semaine</option>`;
+                }
+                weeklySettings.innerHTML += `
+                    <div class="settings-list-item" style="flex-direction:column; align-items:stretch; gap:8px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span style="font-weight:700;">${wh.name}</span>
+                            <button class="btn-delete" onclick="deleteWeeklyHabit('${wh.id}')">Supprimer</button>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="font-size:0.8rem; color:var(--text-muted); white-space:nowrap;">Fréquence :</span>
+                            <select class="input-dark" style="flex:1; padding:7px 10px; font-size:0.85rem; border-radius:8px;" onchange="setWeeklyHabitFreq('${wh.id}', this.value)">
+                                ${freqOptions}
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Chrono Presets
+            const presetsList = document.getElementById('presets-settings-list');
+            presetsList.innerHTML = '';
+            appData.timerPresets.forEach(sec => {
+                const m = Math.floor(sec / 60); const s = sec % 60;
+                let lbl = m > 0 ? `${m}min` : ''; if(s > 0) lbl += ` ${s}sec`;
+                const isCrown = appData.defaultTimer === sec ? '👑 Défaut' : 'Définir défaut';
+                presetsList.innerHTML += `
+                    <div class="settings-list-item">
+                        <strong>${lbl}</strong>
+                        <div style="display:flex; gap:10px;">
+                            <button class="btn-timer-preset" style="font-size:0.75rem; padding:5px 10px;" onclick="setDefaultTimer(${sec})">${isCrown}</button>
+                            <button class="btn-delete" onclick="deleteTimerPreset(${sec})">✕</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // --- INTERFACE NAV & SYSTEM ---
+        function toggleMenu() {
+            document.getElementById('menuOverlay').classList.toggle('open');
+        }
+
+        function navigateTo(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.getElementById(`page-${pageId}`).classList.add('active');
+            toggleMenu();
+
+            // Gestion dynamique du header
+            const headerStats = document.getElementById('header-stats-container');
+            const headerSucces = document.getElementById('header-succes-container');
+            const headerTimers = document.getElementById('header-timers-container');
+
+            headerStats.style.display = 'none';
+            headerSucces.style.display = 'none';
+            headerTimers.style.display = 'none';
+
+            if (pageId === 'accueil') {
+                headerStats.style.display = 'flex';
+                renderAccueil();
+            } else if (pageId === 'sport') {
+                headerTimers.style.display = 'flex';
+                renderSport();
+            } else if (pageId === 'performance') {
+                renderPerformance();
+            } else if (pageId === 'nutrition') {
+                renderNutrition();
+            } else if (pageId === 'succes') {
+                headerSucces.style.display = 'flex';
+                renderSuccesPage();
+            } else if (pageId === 'parametres') {
+                renderParametres();
+            }
+        }
+
+        // INITIALISATION GLOBAL
+        window.onload = () => {
+            initStorage();
+            calculateGlobalStats();
+            renderWeekPlanner();
+            renderAccueil();
+            updateTimerDisplay();
+            renderTimerPresets();
+            
+            // Masquer les dropdown au clic extérieur
+            document.getElementById('sport-date-picker').value = getTodayStr();
+
+            // SAUVEGARDE AUTOMATIQUE QUOTIDIENNE
+            const today = getTodayStr();
+            const lastAutoBackup = localStorage.getItem('lastAutoBackup');
+            if (lastAutoBackup !== today) {
+                setTimeout(() => {
+                    try {
+                        const autoData = localStorage.getItem('tracker_progres_data');
+                        if (!autoData || autoData === '{}' || autoData === 'null') return;
+                        let parsedAuto;
+                        try { parsedAuto = JSON.parse(autoData); } catch(e) { return; }
+                        if (isProgresDataEmpty(parsedAuto)) return;
+                        getGoogleToken((token) => {
+                            const data = autoData;
+                            fetch(`https://www.googleapis.com/drive/v3/files?q=name%3D%27${BACKUP_FILENAME}%27+and+trashed%3Dfalse&fields=files(id,name)`,
+                                { headers: { Authorization: `Bearer ${token}` } }
+                            ).then(r => r.json()).then(searchData => {
+                                const existingFile = searchData.files && searchData.files[0];
+                                const blob = new Blob([data], { type: 'application/json' });
+                                const formData = new FormData();
+                                formData.append('metadata', new Blob([JSON.stringify({ name: BACKUP_FILENAME })], { type: 'application/json' }));
+                                formData.append('file', blob);
+                                const url = existingFile
+                                    ? `https://www.googleapis.com/upload/drive/v3/files/${existingFile.id}?uploadType=multipart&keepRevisionForever=true`
+                                    : `https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&keepRevisionForever=true`;
+                                return fetch(url, { method: existingFile ? 'PATCH' : 'POST', headers: { Authorization: `Bearer ${token}` }, body: formData });
+                            }).then(res => {
+                                if (res && res.ok) {
+                                    localStorage.setItem('lastAutoBackup', today);
+                                    setDriveStatus(`✅ Sauvegarde auto — ${new Date().toLocaleString('fr-FR')}`, '#00ff66');
+                                }
+                            }).catch(() => {});
+                        });
+                    } catch(e) {} // silencieux si Google pas encore chargé
+                }, 6000);
+            }
+        };
+    </script>
+</body>
+</html>
